@@ -1,0 +1,39 @@
+.form_input_group {
+  position: relative;
+  width: 100%;
+}
+
+.form_input_group .form_input {
+  background-color: #ffffff;
+  color: #452720;
+  width: 100%;
+  padding: 20px 5px 5px 10px;
+  outline: 0;
+  border: 5px solid rgb(73 42 23 / 59%);
+  border-radius: 10px;
+  font-size: medium;
+  box-sizing: border-box;
+}
+
+.form_input_group .form_input + span {
+  color: #452720;
+  position: absolute;
+  left: 10px;
+  top: 3.5px;
+  font-size: 0.9em;
+  cursor: text;
+  transition: 0.3s ease;
+}
+
+.form_input-group .form_input:placeholder-shown + span {
+  top: 12.5px;
+  font-size: 0.9em;
+}
+
+.form_input_group .form_input:focus + span,
+.form_input_group .form_input:valid + span {
+  color: #6e2c0a;
+  top: 5px;
+  font-size: 0.7em;
+  font-weight: 600;
+}
