@@ -6,27 +6,56 @@ exports.googleLogin = async (req, res) => {
     try {
         const { token } = req.body;
         const result = await authService.verifyAndLoginGoogle(token);
-        
-        res.status(200).json({ 
-            status: 'success', 
-            data: result 
-        });
+        res.status(200).json({ status: 'success', data: result });
     } catch (error) {
-        res.status(401).json({ status: 'error', message: 'Token Google không hợp lệ' });
+        // THÊM DÒNG NÀY ĐỂ BIẾT LỖI TẠI ĐÂU:
+        console.error("🔴 LỖI BACKEND GOOGLE LOGIN:", error);
+        res.status(401).json({ status: 'error', message: 'Token Google không hợp lệ', error: error.message });
     }
 };
 
-exports.register = async (req, res) => {
+exports.verifyOTP = async (req, res) => {
     try {
-        const { firstName, lastName, email, password } = req.body;
-        const result = await authService.registerUser({ firstName, lastName, email, password });
+        const { email, otp } = req.body;
         
-        res.status(201).json({ 
-            status: 'success', 
-            data: result 
-        });
+        // Tìm OTP trong DB
+        const { data: otpRecord, error } = await supabase
+            .from('otp_tokens')
+            .select('*')
+            .eq('email', email)
+            .eq('otp_code', otp)
+            .gte('expires_at', new Date().toISOString()) // Chưa hết hạn
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single();
+
+        if (error || !otpRecord) {
+            return res.status(400).json({ status: 'error', message: 'Mã OTP không hợp lệ hoặc đã hết hạn.' });
+        }
+
+        // Xóa OTP sau khi dùng
+        await supabase.from('otp_tokens').delete().eq('id', otpRecord.id);
+
+        res.status(200).json({ status: 'success', data: { email, requiresSetup: true } });
     } catch (error) {
-        res.status(400).json({ status: 'error', message: error.message });
+        res.status(500).json({ status: 'error', message: error.message });
+    }
+};
+
+exports.checkUsername = async (req, res) => {
+    try {
+        const { username } = req.query;
+        if (!username) return res.status(400).json({ error: 'Missing username' });
+
+        const { data: existingUser } = await supabase
+            .from('profiles')
+            .select('id')
+            .eq('username', username)
+            .single();
+
+        return res.status(200).json({ exists: !!existingUser });
+    } catch (error) {
+        res.status(500).json({ error: 'Database check failed' });
     }
 };
 
@@ -34,25 +63,35 @@ exports.completeSetup = async (req, res) => {
     try {
         const { email, username, password } = req.body;
         
-        // Kiểm tra tính độc nhất của Username trong database
+        // Cấu hình Dry Run kiểm tra Username
         const { data: existingUser } = await supabase
-            .from('Profiles')
+            .from('profiles')
             .select('id')
             .eq('username', username)
-            .single();
+            .neq('email', email) // Bỏ qua record hiện tại của user này
+            .maybeSingle();
 
         if (existingUser) {
-            return res.status(400).json({ status: 'error', message: 'Username đã được sử dụng. Vui lòng chọn tên khác.' });
+            return res.status(400).json({ status: 'error', message: 'Username đã được sử dụng.' });
         }
 
-        // Logic gán mật khẩu mặc định nếu bỏ trống dữ liệu từ bộ nhớ RAM đưa xuống
-        const finalPassword = (!password || password.trim() === "") ? "abc123" : password;
+        // Logic Mật khẩu
+        let finalPassword = password;
+        if (!password || password.trim() === "") {
+            finalPassword = "abc123";
+        } else {
+            // Validate: >= 8 ký tự, 1 thường, 1 số, 1 đặc biệt
+            const regex = /^(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+            if (!regex.test(password)) {
+                return res.status(400).json({ status: 'error', message: 'Mật khẩu không đạt yêu cầu bảo mật.' });
+            }
+        }
         
         const salt = await bcrypt.genSalt(10);
         const passwordHash = await bcrypt.hash(finalPassword, salt);
 
         const { error: updateError } = await supabase
-            .from('Profiles')
+            .from('profiles')
             .update({ username: username, password_hash: passwordHash })
             .eq('email', email);
 

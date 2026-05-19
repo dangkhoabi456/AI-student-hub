@@ -2,9 +2,19 @@ const { OAuth2Client } = require('google-auth-library');
 const supabase = require('../config/supabase');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+const nodemailer = require('nodemailer');
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
+// Cấu hình transporter gửi mail
+const transporter = nodemailer.createTransport({
+    host: process.env.EMAIL_HOST,
+    port: parseInt(process.env.EMAIL_PORT) || 2525,
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+    }
+});
 exports.verifyAndLoginGoogle = async (googleToken) => {
     const ticket = await client.verifyIdToken({
         idToken: googleToken,
@@ -15,20 +25,22 @@ exports.verifyAndLoginGoogle = async (googleToken) => {
     const { email, name, sub: googleId } = payload;
 
     let { data: user, error: fetchError } = await supabase
-        .from('Profiles')
+        .from('profiles')
         .select('*')
         .eq('email', email)
         .maybeSingle();
+
     if (fetchError) throw fetchError;
 
     let requiresSetup = false;
 
+    // Nếu user chưa tồn tại, tạo mới tạm thời
     if (!user) {
         const { data: newUser, error: insertError } = await supabase
-            .from('Profiles')
+            .from('profiles')
             .insert([{
                 email: email,
-                username: `user_${googleId.substring(0, 8)}`,
+                username: `user_${googleId.substring(0, 8)}_${Date.now().toString().slice(-4)}`,
                 full_name: name,
                 password_hash: 'GOOGLE_SSO_NO_PASSWORD'
             }])
@@ -42,45 +54,35 @@ exports.verifyAndLoginGoogle = async (googleToken) => {
         requiresSetup = true;
     }
 
+    // Nếu tài khoản mới hoặc chưa setup, bắt buộc chạy qua luồng OTP
+    if (requiresSetup) {
+        const otpCode = Math.floor(100000 + Math.random() * 900000).toString(); // Gen 6 số
+        const expiresAt = new Date(Date.now() + 10 * 60000); // Hết hạn sau 10 phút
+
+        // Lưu vào bảng OTP_Tokens
+        await supabase.from('OTP_Tokens').insert([{
+            email: email,
+            otp_code: otpCode,
+            expires_at: expiresAt.toISOString()
+        }]);
+
+        // Gửi Mail
+        await transporter.sendMail({
+            from: process.env.EMAIL_USER,
+            to: email,
+            subject: 'AI StudyHub - Your Verification Code',
+            text: `Mã xác thực của bạn là: ${otpCode}. Mã sẽ hết hạn sau 10 phút.`
+        });
+
+        return { email, requiresOTP: true };
+    }
+
+    // Nếu đã hoàn tất setup trước đó -> Cấp token login luôn
     const accessToken = jwt.sign(
-        { userId: user.id, email: user.email, role: 'User' },
+        { userId: user.id, email: user.email },
         process.env.JWT_SECRET,
         { expiresIn: '24h' }
     );
 
-    return { user, accessToken, requiresSetup };
-};
-
-exports.registerUser = async (userData) => {
-    const { firstName, lastName, email, password } = userData;
-
-    const { data: existingUser } = await supabase
-        .from('Profiles')
-        .select('id')
-        .eq('email', email)
-        .single();
-
-    if (existingUser) {
-        throw new Error('Email này đã được sử dụng.');
-    }
-
-    const salt = await bcrypt.genSalt(10);
-    const passwordHash = await bcrypt.hash(password, salt);
-    const fullName = `${firstName} ${lastName}`.trim();
-    const username = `user_${Date.now().toString().slice(-8)}`;
-
-    const { data: newUser, error: insertError } = await supabase
-        .from('Profiles')
-        .insert([{
-            email: email,
-            username: username,
-            full_name: fullName,
-            password_hash: passwordHash
-        }])
-        .select()
-        .single();
-
-    if (insertError) throw insertError;
-
-    return newUser;
+    return { user, accessToken, requiresSetup: false, requiresOTP: false };
 };

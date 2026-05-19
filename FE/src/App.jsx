@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import RegisterPage from "./components/pages/RegisterPage/RegisterGoogle.jsx";
 import LoginPage from "./components/pages/LoginPage/LoginPage.jsx";
 import CompleteProfile from "./components/pages/RegisterPage/CompleteProfile.jsx";
+import OTPVerification from "./components/pages/RegisterPage/OTPVerification.jsx"; // File mới
 
 function App() {
   const [currentView, setCurrentView] = useState("login");
@@ -9,6 +10,11 @@ function App() {
 
   const handleSwitchView = (viewName) => {
     setCurrentView(viewName);
+  };
+
+  const handleRequireOTP = (email) => {
+    setSetupEmail(email);
+    handleSwitchView("otp");
   };
 
   const handleRequireSetup = (email) => {
@@ -21,13 +27,19 @@ function App() {
       {currentView === "login" && (
         <LoginPage 
           onSwitchToRegister={() => handleSwitchView("register")} 
-          onRequireSetup={handleRequireSetup}
+          onRequireOTP={handleRequireOTP}
         />
       )}
       {currentView === "register" && (
         <RegisterPage 
           onSwitchToLogin={() => handleSwitchView("login")} 
-          onRequireSetup={handleRequireSetup}
+          onRequireOTP={handleRequireOTP}
+        />
+      )}
+      {currentView === "otp" && (
+        <OTPVerification 
+          email={setupEmail} 
+          onSuccess={() => handleRequireSetup(setupEmail)}
         />
       )}
       {currentView === "completeProfile" && (

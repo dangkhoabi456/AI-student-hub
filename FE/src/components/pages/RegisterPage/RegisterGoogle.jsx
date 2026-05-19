@@ -3,26 +3,21 @@ import { GoogleLogin } from "@react-oauth/google";
 import axios from "axios";
 import "./Register.css";
 
-function Register({ onSwitchToLogin, onRequireSetup }) {
-  
+// THÊM onRequireOTP vào props
+function Register({ onSwitchToLogin, onRequireSetup, onRequireOTP }) {
+
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
       const googleToken = credentialResponse.credential;
-      
-      // Gửi Google Token lên backend để xác thực/tạo tài khoản tạm thời
-      const res = await axios.post("http://localhost:5000/api/auth/google", {
-        token: googleToken,
-      });
+      const res = await axios.post("http://localhost:5000/api/auth/google", { token: googleToken });
 
-      // Lưu trữ JWT Token nội bộ vào Local Storage
-      localStorage.setItem("accessToken", res.data.data.accessToken);
-      
-      // Bộ nhớ RAM đọc cờ trạng thái 'requiresSetup' từ Backend trả về
-      if (res.data.data.requiresSetup) {
-        // Kích hoạt callback chuyển View sang trang CompleteProfile, truyền kèm Email
-        onRequireSetup(res.data.data.user.email); 
+      // LUỒNG KIỂM TRA DUY NHẤT
+      if (res.data.data.requiresOTP) {
+        // Tài khoản mới: Backend yêu cầu OTP -> Chuyển sang màn OTP
+        onRequireOTP(res.data.data.email);
       } else {
-        // Nếu là tài khoản cũ đã thiết lập xong, vào thẳng Dashboard
+        // Tài khoản cũ: Đã setup xong -> Lưu token và vào thẳng Dashboard
+        localStorage.setItem("accessToken", res.data.data.accessToken);
         alert("Login Successful!");
         window.location.href = "/dashboard";
       }
@@ -42,17 +37,17 @@ function Register({ onSwitchToLogin, onRequireSetup }) {
 
         <div className="account_link_container">
           <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
-            <GoogleLogin 
-              onSuccess={handleGoogleSuccess} 
-              onError={() => console.log("Google Auth Error")} 
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={() => console.log("Google Auth Error")}
             />
           </div>
         </div>
 
         <p className="register_signin">
-          Already have an account? 
-          <span 
-            onClick={onSwitchToLogin} 
+          Already have an account?
+          <span
+            onClick={onSwitchToLogin}
             style={{ color: '#0056b3', cursor: 'pointer', textDecoration: 'underline', marginLeft: '5px', fontWeight: '500' }}
           >
             Sign in
