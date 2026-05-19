@@ -1,5 +1,9 @@
-import React, { useState } from "react";
-import RegisterPage from "./components/pages/RegisterPage/RegisterGoogle.jsx";
+
+ import RegisterGoogle from "./components/pages/RegisterPage/RegisterGoogle.jsx";
+// import EnterUserNamePass from "./components/pages/RegisterPage/EnterUserNamePass.jsx";
+import HeroSection from "./components/pages/HeroSection/HeroSection.jsx";
+import { BrowserRouter, Routes, Route } from "react-router";
+
 import LoginPage from "./components/pages/LoginPage/LoginPage.jsx";
 import CompleteProfile from "./components/pages/RegisterPage/CompleteProfile.jsx";
 
@@ -17,6 +21,7 @@ function App() {
   };
 
   return (
+
     <div className="app-container">
       {currentView === "login" && (
         <LoginPage 
@@ -37,6 +42,7 @@ function App() {
         />
       )}
     </div>
+
   );
 }
 
