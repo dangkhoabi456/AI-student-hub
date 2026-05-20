@@ -1,5 +1,6 @@
-
- import RegisterGoogle from "./components/pages/RegisterPage/RegisterGoogle.jsx";
+import React, { useState } from 'react';
+import RegisterPage from './components/pages/RegisterPage/RegisterGoogle.jsx';
+import RegisterGoogle from "./components/pages/RegisterPage/RegisterGoogle.jsx";
 // import EnterUserNamePass from "./components/pages/RegisterPage/EnterUserNamePass.jsx";
 import HeroSection from "./components/pages/HeroSection/HeroSection.jsx";
 import { BrowserRouter, Routes, Route } from "react-router";
@@ -10,7 +11,7 @@ import OTPVerification from "./components/pages/RegisterPage/OTPVerification.jsx
 
 function App() {
   const [currentView, setCurrentView] = useState("login");
-  const [setupEmail, setSetupEmail] = useState(""); 
+  const [setupEmail, setSetupEmail] = useState("");
 
   const handleSwitchView = (viewName) => {
     setCurrentView(viewName);
@@ -30,26 +31,26 @@ function App() {
 
     <div className="app-container">
       {currentView === "login" && (
-        <LoginPage 
-          onSwitchToRegister={() => handleSwitchView("register")} 
+        <LoginPage
+          onSwitchToRegister={() => handleSwitchView("register")}
           onRequireOTP={handleRequireOTP}
         />
       )}
       {currentView === "register" && (
-        <RegisterPage 
-          onSwitchToLogin={() => handleSwitchView("login")} 
+        <RegisterPage
+          onSwitchToLogin={() => handleSwitchView("login")}
           onRequireOTP={handleRequireOTP}
         />
       )}
       {currentView === "otp" && (
-        <OTPVerification 
-          email={setupEmail} 
+        <OTPVerification
+          email={setupEmail}
           onSuccess={() => handleRequireSetup(setupEmail)}
         />
       )}
       {currentView === "completeProfile" && (
-        <CompleteProfile 
-          email={setupEmail} 
+        <CompleteProfile
+          email={setupEmail}
           onSuccess={() => { window.location.href = "/dashboard"; }}
         />
       )}

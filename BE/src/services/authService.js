@@ -60,7 +60,7 @@ exports.verifyAndLoginGoogle = async (googleToken) => {
         const expiresAt = new Date(Date.now() + 10 * 60000); // Hết hạn sau 10 phút
 
         // Lưu vào bảng OTP_Tokens
-        await supabase.from('OTP_Tokens').insert([{
+        await supabase.from('otp_tokens').insert([{
             email: email,
             otp_code: otpCode,
             expires_at: expiresAt.toISOString()
