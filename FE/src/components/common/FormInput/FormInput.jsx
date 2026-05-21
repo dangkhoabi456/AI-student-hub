@@ -1,21 +1,16 @@
-import React from 'react';
+import "./FormInput.css";
 
-function FormInput({ label, type, name, value, onChange, className }) {
+function FormInput({ type = "text", label, className = "" }) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', marginBottom: '15px' }}>
-      <label style={{ marginBottom: '5px', fontWeight: 'bold' }}>
-        {label}
-      </label>
-      <input 
-        type={type} 
-        name={name}
-        value={value}
-        onChange={onChange}
-        className={className} 
-        style={{ padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
+    <label className="form_input_group">
+      <input
+        className={`form_input ${className}`}
+        type={type}
+        placeholder=" "
         required
       />
-    </div>
+      <span>{label}</span>
+    </label>
   );
 }
 
