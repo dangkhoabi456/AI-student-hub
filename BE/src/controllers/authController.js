@@ -81,7 +81,7 @@ exports.completeSetup = async (req, res) => {
             finalPassword = "abc123";
         } else {
             // Validate: >= 8 ký tự, 1 thường, 1 số, 1 đặc biệt
-            const regex = /^(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+            const regex = /^(?=.*[a-z])(?=.*\d)(?=.*[^A-Za-z0-9])\S{8,}$/;
             if (!regex.test(password)) {
                 return res.status(400).json({ status: 'error', message: 'Mật khẩu không đạt yêu cầu bảo mật.' });
             }
