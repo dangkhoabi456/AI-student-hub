@@ -81,7 +81,7 @@ exports.verifyAndLoginGoogle = async (googleToken) => {
     const accessToken = jwt.sign(
         { userId: user.id, email: user.email },
         process.env.JWT_SECRET,
-        { expiresIn: '24h' }
+        { expiresIn: '1h' }
     );
 
     return { user, accessToken, requiresSetup: false, requiresOTP: false };

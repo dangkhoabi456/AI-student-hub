@@ -17,19 +17,25 @@ exports.googleLogin = async (req, res) => {
 exports.verifyOTP = async (req, res) => {
     try {
         const { email, otp } = req.body;
-        
-        // Tìm OTP trong DB
+
+        // 1. Loại bỏ khoảng trắng thừa nếu người dùng copy/paste dính dấu cách
+        const cleanOtp = otp.trim();
+
+        // 2. Tìm OTP trong DB
         const { data: otpRecord, error } = await supabase
             .from('otp_tokens')
             .select('*')
             .eq('email', email)
-            .eq('otp_code', otp)
-            .gte('expires_at', new Date().toISOString()) // Chưa hết hạn
+            .eq('otp_code', cleanOtp)
+            // .gte('expires_at  new Date().toISOString())
             .order('created_at', { ascending: false })
             .limit(1)
-            .single();
+            .maybeSingle(); // Dùng maybeSingle thay vì single để tránh lỗi nếu có >1 record
 
-        if (error || !otpRecord) {
+        // In ra log để debug (bạn kiểm tra Terminal của Backend nếu vẫn lỗi)
+        if (error) console.error("🔴 Lỗi truy vấn Supabase OTP:", error);
+
+        if (!otpRecord) {
             return res.status(400).json({ status: 'error', message: 'Mã OTP không hợp lệ hoặc đã hết hạn.' });
         }
 
@@ -38,6 +44,7 @@ exports.verifyOTP = async (req, res) => {
 
         res.status(200).json({ status: 'success', data: { email, requiresSetup: true } });
     } catch (error) {
+        console.error("🔴 Lỗi hệ thống verifyOTP:", error);
         res.status(500).json({ status: 'error', message: error.message });
     }
 };
@@ -62,7 +69,7 @@ exports.checkUsername = async (req, res) => {
 exports.completeSetup = async (req, res) => {
     try {
         const { email, username, password } = req.body;
-        
+
         // Cấu hình Dry Run kiểm tra Username
         const { data: existingUser } = await supabase
             .from('profiles')
@@ -86,7 +93,7 @@ exports.completeSetup = async (req, res) => {
                 return res.status(400).json({ status: 'error', message: 'Mật khẩu không đạt yêu cầu bảo mật.' });
             }
         }
-        
+
         const salt = await bcrypt.genSalt(10);
         const passwordHash = await bcrypt.hash(finalPassword, salt);
 

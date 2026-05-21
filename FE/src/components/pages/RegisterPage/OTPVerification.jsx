@@ -24,7 +24,13 @@ function OTPVerification({ email, onSuccess }) {
       <form className="register_form" onSubmit={handleSubmit} style={{ backgroundColor: '#fff8e7', padding: '30px', borderRadius: '15px' }}>
         <p className="register_title">Xác minh Email</p>
         <p className="register_message">Vui lòng nhập mã 6 số đã được gửi tới <b>{email}</b></p>
-        <FormInput type="text" value={otp} onChange={(e) => setOtp(e.target.value)} label="Mã OTP" />
+        <FormInput
+          type="text"
+          value={otp}
+          onChange={(e) => setOtp(e.target.value)}
+          label="Mã OTP"
+          placeholder=" "
+        />
         {errorMsg && <p style={{ color: "red", fontSize: "14px" }}>{errorMsg}</p>}
         <button className="register_submit" style={{ width: '100%', padding: '10px', backgroundColor: '#000', color: '#fff' }} type="submit">Xác nhận OTP</button>
       </form>

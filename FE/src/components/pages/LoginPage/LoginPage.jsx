@@ -1,11 +1,12 @@
-
-import FormInput from "../../common/FormInput/FormInput.jsx"; // Đảm bảo đường dẫn đúng
+import React from "react";
+import FormInput from "../../common/FormInput/FormInput.jsx"; 
 import { GoogleLogin } from "@react-oauth/google";
 import axios from "axios";
 import "./LoginPage.css";
 
-function LoginPage() {
-  // Hàm xử lý khi người dùng chọn tài khoản Google thành công
+// Khai báo nhận hàm onSwitchToRegister và onRequireOTP từ App.jsx gửi xuống
+function LoginPage({ onSwitchToRegister, onRequireOTP }) {
+  
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
       const googleToken = credentialResponse.credential;
@@ -15,12 +16,21 @@ function LoginPage() {
         token: googleToken,
       });
 
-      // Lưu Token nội bộ của AI StudyHub vào Local Storage
-      localStorage.setItem("accessToken", res.data.data.accessToken);
+      const responseData = res.data.data;
 
-      alert("Log in successfully!");
-      // Chuyển hướng người dùng vào trang chủ/dashboard
-      window.location.href = "/dashboard";
+      // ĐỒNG BỘ LUỒNG VỚI REGISTER:
+      if (responseData.requiresOTP) {
+        // Nếu Gmail chưa từng register -> Mặc định backend trả về requiresOTP: true
+        alert("Email này chưa đăng ký tài khoản. Hệ thống tự động chuyển sang luồng đăng ký mới!");
+        
+        // Kích hoạt hàm của App.jsx để đổi currentView sang màn hình nhập OTP
+        onRequireOTP(responseData.email);
+      } else {
+        // Nếu là tài khoản cũ đã hoàn tất setup trước đó
+        localStorage.setItem("accessToken", responseData.accessToken);
+        alert("Log in successfully!");
+        window.location.href = "/dashboard";
+      }
     } catch (error) {
       console.error("Lỗi xác thực Google với Backend:", error);
       alert("Log in failed. Please try again.");
@@ -52,8 +62,15 @@ function LoginPage() {
         <button className="login_submit" type="submit">Submit</button>
 
         <p className="login_message">
-          Didn't have an account? <a href="/register">Create one</a>
+          Didn't have an account?{' '}
+          <span
+            onClick={onSwitchToRegister} // Gọi trực tiếp hàm destructuring từ props
+            style={{ color: '#0056b3', cursor: 'pointer', textDecoration: 'underline', fontWeight: '500' }}
+          >
+            Create one
+          </span>
         </p>
+        
         <p className="forgot_password_message">
           <a href="/forgot-password">Forgot password?</a>
         </p>
@@ -61,12 +78,11 @@ function LoginPage() {
         <div className="account_link_container">
           <p className="link_account_text">Or with</p>
 
-          {/* Nút Google chuẩn của thư viện thay thế cho thẻ SVG cũ */}
           <div style={{ display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
             <GoogleLogin
               onSuccess={handleGoogleSuccess}
               onError={handleGoogleError}
-              useOneTap={false} // Bật true nếu muốn hiện popup tự động góc phải màn hình
+              useOneTap={false} 
             />
           </div>
         </div>
