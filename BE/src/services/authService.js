@@ -1,50 +1,88 @@
 const { OAuth2Client } = require('google-auth-library');
-const supabase = require('../config/supabase'); //Câu lệnh chứa đựng cấu hình kết nối Supabase để truy cập cơ sở dữ liệu Profiles
-const jwt = require('jsonwebtoken'); //Câu lệnh chứa đựng thư viện jsonwebtoken để tạo JWT nội bộ cho hệ thống AI StudyHub
+const supabase = require('../config/supabase');
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
+const nodemailer = require('nodemailer');
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
+// Cấu hình transporter gửi mail
+const transporter = nodemailer.createTransport({
+    host: process.env.EMAIL_HOST,
+    port: parseInt(process.env.EMAIL_PORT) || 2525,
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+    }
+});
 exports.verifyAndLoginGoogle = async (googleToken) => {
-    // 1. Gửi token lên Google để xác minh (Xác thực chữ ký số)
     const ticket = await client.verifyIdToken({
         idToken: googleToken,
-        audience: process.env.GOOGLE_CLIENT_ID,  
+        audience: process.env.GOOGLE_CLIENT_ID,
     });
-    
-    // 2. Trích xuất Payload (Dữ liệu đã giải mã)
-    const payload = ticket.getPayload();
-    const { email, name, sub: googleId } = payload; // 'sub' là ID duy nhất của Google
 
-    // 3. Thực thi SQL: Kiểm tra xem user này đã có trong bảng Profiles chưa
+    const payload = ticket.getPayload();
+    const { email, name, sub: googleId } = payload;
+
     let { data: user, error: fetchError } = await supabase
-        .from('Profiles')
+        .from('profiles')
         .select('*')
         .eq('email', email)
-        .single();
+        .maybeSingle();
 
-    // 4. Nếu chưa có (Lần đầu đăng nhập) -> Tự động Insert (Sign up)
+    if (fetchError) throw fetchError;
+
+    let requiresSetup = false;
+
+    // Nếu user chưa tồn tại, tạo mới tạm thời
     if (!user) {
         const { data: newUser, error: insertError } = await supabase
-            .from('Profiles')
-            .insert([{ 
-                email: email, 
-                username: `user_${googleId.substring(0, 8)}`, // Tạo username tạm
+            .from('profiles')
+            .insert([{
+                email: email,
+                username: `user_${googleId.substring(0, 8)}_${Date.now().toString().slice(-4)}`,
                 full_name: name,
-                password_hash: 'GOOGLE_SSO_NO_PASSWORD' // Không lưu pass vì dùng SSO
+                password_hash: 'GOOGLE_SSO_NO_PASSWORD'
             }])
             .select()
             .single();
-            
+
         if (insertError) throw insertError;
         user = newUser;
+        requiresSetup = true;
+    } else if (user.password_hash === 'GOOGLE_SSO_NO_PASSWORD') {
+        requiresSetup = true;
     }
 
-    // 5. Cấp phát Custom JWT của riêng hệ thống AI StudyHub
+    // Nếu tài khoản mới hoặc chưa setup, bắt buộc chạy qua luồng OTP
+    if (requiresSetup) {
+        const otpCode = Math.floor(100000 + Math.random() * 900000).toString(); // Gen 6 số
+        const expiresAt = new Date(Date.now() + 10 * 60000); // Hết hạn sau 10 phút
+
+        // Lưu vào bảng OTP_Tokens
+        await supabase.from('otp_tokens').insert([{
+            email: email,
+            otp_code: otpCode,
+            expires_at: expiresAt.toISOString()
+        }]);
+
+        // Gửi Mail
+        await transporter.sendMail({
+            from: process.env.EMAIL_USER,
+            to: email,
+            subject: 'AI StudyHub - Your Verification Code',
+            text: `Mã xác thực của bạn là: ${otpCode}. Mã sẽ hết hạn sau 10 phút.`
+        });
+
+        return { email, requiresOTP: true };
+    }
+
+    // Nếu đã hoàn tất setup trước đó -> Cấp token login luôn
     const accessToken = jwt.sign(
-        { userId: user.id, email: user.email, role: 'User' },
+        { userId: user.id, email: user.email },
         process.env.JWT_SECRET,
         { expiresIn: '24h' }
     );
 
-    return { user, accessToken };
+    return { user, accessToken, requiresSetup: false, requiresOTP: false };
 };
