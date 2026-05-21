@@ -1,5 +1,6 @@
 import {Link} from "react-router";
 import "./HeroSection.css";
+import Logo from "../../../assets/logo/Logo.jsx";
 
 function HeroSection() {
   return (
@@ -7,7 +8,7 @@ function HeroSection() {
       <section className="hero">
         <nav className="navbar">
           <div className="logo">
-            <div className="logo_icon">✦</div>
+            <Logo />
             <span>AI Study Hub</span>
           </div>
 

@@ -17,7 +17,7 @@ return (
 
           <FormInput
             type="password"
-            label="Password"
+            label="Password"pp
             className="password_input"
           />
         </div>
