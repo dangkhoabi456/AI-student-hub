@@ -18,22 +18,27 @@ exports.verifyOTP = async (req, res) => {
     try {
         const { email, otp } = req.body;
 
-        // 1. Loại bỏ khoảng trắng thừa nếu người dùng copy/paste dính dấu cách
-        const cleanOtp = otp.trim();
+        // 1. Chuẩn hóa dữ liệu bộ nhớ tuyệt đối
+        // Chuyển email về in thường và ép otp về kiểu chuỗi nguyên bản
+        const cleanEmail = email.toLowerCase().trim();
+        const cleanOtp = String(otp).trim();
 
-        // 2. Tìm OTP trong DB
+        // In ra Terminal của Backend để bạn theo dõi Dry Run trực tiếp
+        console.log(`[DRY RUN] Đang kiểm tra: Email="${cleanEmail}", OTP="${cleanOtp}"`);
+
+        // 2. Tìm OTP trong DB với cú pháp chuẩn
         const { data: otpRecord, error } = await supabase
             .from('otp_tokens')
             .select('*')
-            .eq('email', email)
+            .eq('email', cleanEmail)
             .eq('otp_code', cleanOtp)
-            // .gte('expires_at  new Date().toISOString())
+            .gte('expires_at', new Date().toISOString())
             .order('created_at', { ascending: false })
             .limit(1)
-            .maybeSingle(); // Dùng maybeSingle thay vì single để tránh lỗi nếu có >1 record
+            .maybeSingle();
 
-        // In ra log để debug (bạn kiểm tra Terminal của Backend nếu vẫn lỗi)
-        if (error) console.error("🔴 Lỗi truy vấn Supabase OTP:", error);
+        if (error) console.error("🔴 Lỗi truy vấn Supabase:", error);
+        console.log(`[DRY RUN] Record tìm thấy:`, otpRecord);
 
         if (!otpRecord) {
             return res.status(400).json({ status: 'error', message: 'Mã OTP không hợp lệ hoặc đã hết hạn.' });
@@ -48,7 +53,6 @@ exports.verifyOTP = async (req, res) => {
         res.status(500).json({ status: 'error', message: error.message });
     }
 };
-
 exports.checkUsername = async (req, res) => {
     try {
         const { username } = req.query;

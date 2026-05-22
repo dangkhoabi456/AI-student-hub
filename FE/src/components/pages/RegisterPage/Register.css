@@ -1,32 +1,29 @@
+/* Khung bao ngoài toàn màn hình */
 .register_page {
   display: flex;
-
-  flex-direction: column;
-  gap: 10px;
-  width: 350px;
-
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
+  height: 100vh;
   background-color: #f0e4d7; /* Giữ nguyên màu nền trang */
-
-  padding: 20px;
+  margin: 0;
+  font-family: 'Inter', sans-serif; /* Hoặc font hệ thống bạn đang dùng */
 }
 
+/* Khung nội dung - Đã chỉnh to và cân đối hơn */
 .register_card {
   display: flex;
   flex-direction: column;
   gap: 20px;
-  width: 100%;
-  max-width: 360px; /* Bo gọn kích thước thẻ vừa vặn với nút Google */
-  padding: 40px 30px;
-  border-radius: 20px;
-  position: relative;
+  width: 400px; /* Kích thước chuẩn chuyên nghiệp */
+  padding: 40px; /* Padding rộng rãi hơn cho thoáng */
+  border-radius: 24px; /* Bo góc hiện đại hơn */
   background-color: #fff8e7; /* Giữ nguyên màu nền form */
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08); /* Đổ bóng hiện đại */
-  border: 1px solid rgba(0, 0, 0, 0.04);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1); /* Đổ bóng sâu và mềm hơn */
+  border: 1px solid rgba(124, 106, 88, 0.1);
+  box-sizing: border-box;
 }
 
+/* Tiêu đề đồng bộ với Login */
 .register_title {
   font-size: 28px;
   font-weight: 700;
@@ -34,8 +31,8 @@
   position: relative;
   display: flex;
   align-items: center;
-  padding-left: 30px;
-  color: #000; /* Màu chữ đen rõ nét */
+  padding-left: 35px;
+  color: #7c6a58; /* Đồng bộ màu nâu giống login */
   margin: 0;
 }
 
@@ -43,11 +40,11 @@
 .register_title::after {
   position: absolute;
   content: "";
-  height: 14px;
-  width: 14px;
+  height: 16px;
+  width: 16px;
   border-radius: 50%;
   left: 0;
-  background-color: #000; /* Chấm tròn đen đồng bộ */
+  background-color: #7c6a58;
 }
 
 .register_title::after {
@@ -55,96 +52,47 @@
 }
 
 .register_message {
-  font-size: 14px;
-  color: #222; /* Chữ mô tả đen nhám dễ đọc */
-  line-height: 1.5;
-  margin: 0;
-}
-
-
-.register_signin {
-  text-align: center;
-  margin-bottom: 5px;
-}
-
-.register_signin a {
+  font-size: 14.5px;
   color: #5c3a21;
-}
-
-.register_signin a:hover {
-  text-decoration: underline #5c3a21;
-}
-
-.register_flex {
-  flex-direction: column;
-
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  padding: 10px 0;
+  line-height: 1.6;
+  margin: 0;
+  text-align: left;
 }
 
 .register_signin {
   font-size: 14px;
-  color: #222;
+  color: #5c3a21;
   text-align: center;
   margin: 0;
-  padding-top: 15px;
-  border-top: 1px solid rgba(0, 0, 0, 0.1); /* Đường kẻ phân cách mỏng */
+  padding-top: 20px;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.register_signin span {
+  font-weight: 600;
+  color: #70411c;
+  cursor: pointer;
+}
+
+/* Nút bấm (nếu có dùng button đăng ký) */
+.register_submit {
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  background-color: #70411c;
+  color: white;
+  border: none;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.register_submit:hover {
+  background-color: #42250d;
 }
 
 @keyframes pulse {
-  0% {
-    transform: scale(0.9);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(2);
-    opacity: 0;
-  }
-
+  0% { transform: scale(0.9); opacity: 1; }
+  100% { transform: scale(2); opacity: 0; }
 }
-.register_page {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  background-color: #f0e4d7;
-}
-
-.btn {
-  width: 100%;
-  height: 50px;
-  border-radius: 10px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-weight: 500;
-  gap: 10px;
-  border: 1px solid #ededef;
-  background-color: white;
-  cursor: pointer;
-  transition: 0.2s ease-in-out;
-}
-
-.btn:hover {
-  background-color: #ededef;
-}
-
-.account_link_container{
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: 5px;
-}
-
-.link_account_text {
-  margin-top: 3px;
-  color: #5c3a21;
-  font-size: 14.5px;
-}
-
-}
-

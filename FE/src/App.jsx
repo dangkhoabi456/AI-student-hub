@@ -1,4 +1,3 @@
-<<<<<<< Updated upstream
 import React, { useState } from 'react';
 import RegisterPage from './components/pages/RegisterPage/RegisterGoogle.jsx';
 import RegisterGoogle from "./components/pages/RegisterPage/RegisterGoogle.jsx";
@@ -45,7 +44,7 @@ function App() {
       )}
       {currentView === "otp" && (
         <OTPVerification
-          email={setupEmail}
+          email={setupEmail}  
           onSuccess={() => handleRequireSetup(setupEmail)}
         />
       )}
@@ -57,32 +56,6 @@ function App() {
       )}
     </div>
 
-=======
-  // import RegisterGoogle from "./components/pages/RegisterPage/RegisterGoogle.jsx";
-// import EnterUserNamePass from "./components/pages/RegisterPage/EnterUserNamePass.jsx";
-  //  import HeroSection from "./components/pages/HeroSection/HeroSection.jsx";
-  //  import { BrowserRouter, Routes, Route } from "react-router";
-    import LoginPage from "./components/pages/LoginPage/LoginPage.jsx";
-//import DashboardLayout from "./components/layout/Dashboard/Dashborad.jsx";
-//import PersonalProfile from "./components/pages/PersonalProfilePage/PersonalProfilePage.jsx";
-function App() {
-  return (
-    <>
-    <LoginPage/>
-        {/* <DashboardLayout />  */}
-      {/* <PersonalProfile /> */}
-      {/* <RegisterGoogle />
-      <EnterUserNamePass /> */}
-
-       {/* <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<HeroSection />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterGoogle />} />
-      </Routes>
-    </BrowserRouter> */}
-    </>
->>>>>>> Stashed changes
   );
 }
 

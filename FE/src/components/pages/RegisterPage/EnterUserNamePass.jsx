@@ -1,24 +1,39 @@
+import React, { useState } from "react"; // 1. Bắt buộc import useState
 import "./Register.css";
 import FormInput from "../../common/FormInput/FormInput.jsx";
 
-
- // Đảm bảo đường dẫn đúng
 function EnterUserNamePass() {
-return (
+  // 2. Tạo State để lưu trữ dữ liệu trong bộ nhớ
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // Dry Run kiểm tra giá trị khi bấm Submit
+    console.log("Dữ liệu chuẩn bị gửi đi:", { username, password });
+  };
+
+  return (
     <div className="register_page">
-      <form className="register_form" onSubmit={(e) => e.preventDefault()}>
+      <form className="register_form" onSubmit={handleSubmit}>
         <p className="register_title">Register</p>
         <div className="register_flex">
           <FormInput
             type="text"
-            label="Username or gmail"
+            placeholder="Username or gmail"
             className="username_input"
+            // 3. Liên kết State với Input
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
           />
 
           <FormInput
             type="password"
-            label="Password"pp
+            placeholder="Password"
             className="password_input"
+            // 3. Liên kết State với Input
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
           />
         </div>
 
@@ -28,4 +43,5 @@ return (
     </div>
   );
 }
-export default EnterUserNamePass;
+
+export default EnterUserNamePass;s
