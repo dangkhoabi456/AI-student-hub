@@ -15,6 +15,7 @@ const transporter = nodemailer.createTransport({
         pass: process.env.EMAIL_PASS
     }
 });
+
 exports.verifyAndLoginGoogle = async (googleToken) => {
     const ticket = await client.verifyIdToken({
         idToken: googleToken,
@@ -33,6 +34,7 @@ exports.verifyAndLoginGoogle = async (googleToken) => {
     if (fetchError) throw fetchError;
 
     let requiresSetup = false;
+    let isResume = false; // THÊM BIẾN NHẬN DIỆN TRẠNG THÁI
 
     // Nếu user chưa tồn tại, tạo mới tạm thời
     if (!user) {
@@ -50,8 +52,10 @@ exports.verifyAndLoginGoogle = async (googleToken) => {
         if (insertError) throw insertError;
         user = newUser;
         requiresSetup = true;
+        isResume = false; // Đây là tài khoản mới hoàn toàn
     } else if (user.password_hash === 'GOOGLE_SSO_NO_PASSWORD') {
         requiresSetup = true;
+        isResume = true; // Đây là tài khoản đang thiết lập dang dở
     }
 
     // Nếu tài khoản mới hoặc chưa setup, bắt buộc chạy qua luồng OTP
@@ -74,14 +78,15 @@ exports.verifyAndLoginGoogle = async (googleToken) => {
             text: `Mã xác thực của bạn là: ${otpCode}. Mã sẽ hết hạn sau 10 phút.`
         });
 
-        return { email, requiresOTP: true };
+        // TRẢ VỀ KÈM THEO CỜ isResume CHO FRONTEND
+        return { email, requiresOTP: true, isResume: isResume };
     }
 
     // Nếu đã hoàn tất setup trước đó -> Cấp token login luôn
     const accessToken = jwt.sign(
         { userId: user.id, email: user.email },
         process.env.JWT_SECRET,
-        { expiresIn: '1h' }
+        { expiresIn: '24h' }
     );
 
     return { user, accessToken, requiresSetup: false, requiresOTP: false };

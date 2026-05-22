@@ -1,12 +1,12 @@
 import React from "react";
-import FormInput from "../../common/FormInput/FormInput.jsx"; 
+import FormInput from "../../common/FormInput/FormInput.jsx";
 import { GoogleLogin } from "@react-oauth/google";
 import axios from "axios";
 import "./LoginPage.css";
 
 // Khai báo nhận hàm onSwitchToRegister và onRequireOTP từ App.jsx gửi xuống
 function LoginPage({ onSwitchToRegister, onRequireOTP }) {
-  
+
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
       const googleToken = credentialResponse.credential;
@@ -20,10 +20,11 @@ function LoginPage({ onSwitchToRegister, onRequireOTP }) {
 
       // ĐỒNG BỘ LUỒNG VỚI REGISTER:
       if (responseData.requiresOTP) {
-        // Nếu Gmail chưa từng register -> Mặc định backend trả về requiresOTP: true
-        alert("Email này chưa đăng ký tài khoản. Hệ thống tự động chuyển sang luồng đăng ký mới!");
-        
-        // Kích hoạt hàm của App.jsx để đổi currentView sang màn hình nhập OTP
+        if (responseData.isResume) {
+          alert("Bạn có quá trình thiết lập tài khoản chưa hoàn tất. Hệ thống đang chuyển đến trang tiếp tục!");
+        } else {
+          alert("Email này chưa đăng ký tài khoản. Hệ thống tự động chuyển sang luồng đăng ký mới!");
+        }
         onRequireOTP(responseData.email);
       } else {
         // Nếu là tài khoản cũ đã hoàn tất setup trước đó
@@ -70,7 +71,7 @@ function LoginPage({ onSwitchToRegister, onRequireOTP }) {
             Create one
           </span>
         </p>
-        
+
         <p className="forgot_password_message">
           <a href="/forgot-password">Forgot password?</a>
         </p>
@@ -82,7 +83,7 @@ function LoginPage({ onSwitchToRegister, onRequireOTP }) {
             <GoogleLogin
               onSuccess={handleGoogleSuccess}
               onError={handleGoogleError}
-              useOneTap={false} 
+              useOneTap={false}
             />
           </div>
         </div>
