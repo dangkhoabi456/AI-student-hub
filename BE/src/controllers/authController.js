@@ -1,6 +1,7 @@
 const authService = require('../services/authService');
 const supabase = require('../config/supabase');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 exports.googleLogin = async (req, res) => {
     try {
@@ -74,7 +75,7 @@ exports.completeSetup = async (req, res) => {
     try {
         const { email, username, password } = req.body;
 
-        // Cấu hình Dry Run kiểm tra Username
+        // 1. Dry Run kiểm tra Username
         const { data: existingUser } = await supabase
             .from('profiles')
             .select('id')
@@ -86,29 +87,42 @@ exports.completeSetup = async (req, res) => {
             return res.status(400).json({ status: 'error', message: 'Username đã được sử dụng.' });
         }
 
-        // Logic Mật khẩu
-        let finalPassword = password;
+        // 2. Logic Mật khẩu (BẮT BUỘC)
         if (!password || password.trim() === "") {
-            finalPassword = "abc123";
-        } else {
-            // Validate: >= 8 ký tự, 1 thường, 1 số, 1 đặc biệt
-            const regex = /^(?=.*[a-z])(?=.*\d)(?=.*[^A-Za-z0-9])\S{8,}$/;
-            if (!regex.test(password)) {
-                return res.status(400).json({ status: 'error', message: 'Mật khẩu không đạt yêu cầu bảo mật.' });
-            }
+            return res.status(400).json({ status: 'error', message: 'Mật khẩu là thông tin bắt buộc.' });
+        }
+
+        // Validate: >= 8 ký tự, 1 thường, 1 số, 1 đặc biệt
+        const regex = /^(?=.*[a-z])(?=.*\d)(?=.*[^A-Za-z0-9])\S{8,}$/;
+        if (!regex.test(password)) {
+            return res.status(400).json({ status: 'error', message: 'Mật khẩu không đạt yêu cầu bảo mật.' });
         }
 
         const salt = await bcrypt.genSalt(10);
-        const passwordHash = await bcrypt.hash(finalPassword, salt);
+        const passwordHash = await bcrypt.hash(password, salt);
 
-        const { error: updateError } = await supabase
+        // 3. Cập nhật dữ liệu và lấy lại id của User để cấp Token
+        const { data: updatedUser, error: updateError } = await supabase
             .from('profiles')
             .update({ username: username, password_hash: passwordHash })
-            .eq('email', email);
+            .eq('email', email)
+            .select('id, email')
+            .single();
 
         if (updateError) throw updateError;
 
-        res.status(200).json({ status: 'success', message: 'Cập nhật thành công' });
+        // 4. Sinh Access Token để vào thẳng Dashboard
+        const accessToken = jwt.sign(
+            { userId: updatedUser.id, email: updatedUser.email },
+            process.env.JWT_SECRET,
+            { expiresIn: '1h' }
+        );
+
+        res.status(200).json({
+            status: 'success',
+            message: 'Cập nhật thành công',
+            data: { accessToken } // Trả token về cho Frontend
+        });
     } catch (error) {
         res.status(500).json({ status: 'error', message: error.message });
     }

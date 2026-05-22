@@ -20,11 +20,11 @@ function EnterUserNamePass() {
         <div className="register_flex">
           <FormInput
             type="text"
-            placeholder="Username or gmail"
             className="username_input"
             // 3. Liên kết State với Input
             value={username}
             onChange={(e) => setUsername(e.target.value)}
+            placeholder="Username or gmail"
           />
 
           <FormInput
