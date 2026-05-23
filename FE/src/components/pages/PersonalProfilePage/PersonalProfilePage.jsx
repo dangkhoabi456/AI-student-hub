@@ -3,7 +3,7 @@ import "./PersonalProfilePage.css";
 import defaultAvatar from "../../../assets/imgs/default_avatar.png";
 function PersonalProfile() {
   const [userName, setUserName] = useState("dangkhoabi456");
-
+   const dateOfBirth = new Date("2003-11-19");
   const [isEditingName, setIsEditingName] = useState(false);
   const [newName, setNewName] = useState(userName);
   const [avatar, setAvatar] = useState(defaultAvatar);
@@ -97,6 +97,7 @@ function PersonalProfile() {
             <div className="profile_name_row">
               <h2>{userName}</h2>
               <h2>{userName}@gmail.com</h2>
+              <h2>{dateOfBirth.toDateString()}</h2>
               <button
                 className="edit_name_btn"
                 onClick={() => setIsEditingName(true)}
