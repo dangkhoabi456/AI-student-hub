@@ -222,39 +222,39 @@ body {
   font-size: 12px;
 }
 
-.repositories_section {
+.libraries_section {
   width: 100%;
 }
 
-.repositories_header {
+.libraries_header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 16px;
 }
 
-.repositories_header h3 {
+.libraries_header h3 {
   margin: 0;
   font-size: 18px;
   font-weight: 500;
   color: #70411c;
 }
 
-.repositories_header button {
+.libraries_header button {
   background: transparent;
   border: none;
   color: #58a6ff;
   cursor: pointer;
 }
 
-.repository_grid {
+.library_grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 16px;
   width: 100%;
 }
 
-.repository_profile_card {
+.library_profile_card {
   min-height: 130px;
   border: 1px solid #30363d;
   border-radius: 8px;
@@ -266,7 +266,8 @@ body {
   min-width: 0;
 }
 
-.repo_card_header {
+.library_card_header {
+  border-radius: 6px;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -274,7 +275,7 @@ body {
   min-width: 0;
 }
 
-.repo_card_header h4 {
+.library_card_header h4 {
   margin: 0;
   color: #58a6ff;
   font-size: 16px;
@@ -283,7 +284,7 @@ body {
   overflow-wrap: anywhere;
 }
 
-.repo_card_header span {
+.library_card_header span {
   flex-shrink: 0;
   border: 1px solid #8b949e;
   color: #c9d1d9;
@@ -292,14 +293,14 @@ body {
   font-size: 12px;
 }
 
-.repo_description {
+.library_description {
   color: #c9d1d9;
   font-size: 14px;
   line-height: 1.5;
   margin: 14px 0;
 }
 
-.repo_language {
+.library_language {
   display: flex;
   align-items: center;
   gap: 7px;
@@ -331,7 +332,7 @@ body {
     max-width: 100%;
   }
 
-  .repository_grid {
+  .library_grid {
     grid-template-columns: 1fr;
   }
 
