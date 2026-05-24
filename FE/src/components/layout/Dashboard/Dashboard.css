@@ -144,6 +144,61 @@ body {
   color: #b4531a;
 }
 
+
+/* Library shortcuts in sidebar */
+
+.top_library_header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.top_library_header p {
+  font-size: 14px;
+  font-weight: 700;
+  color: #b4531a;
+}
+
+.top_library_header button {
+  background: transparent;
+  border: none;
+  color: #9a826b;
+  cursor: pointer;
+}
+
+.library_shortcut_list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.library_shortcut_item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #efcbb0;
+  text-decoration: none;
+  font-size: 14px;
+  line-height: 1.4;
+  min-width: 0;
+}
+
+.library_shortcut_item i {
+  color: #d9a066;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.library_shortcut_item span {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.library_shortcut_item:hover {
+  color: #b4531a;
+}
+
 .avatar,
 .profile_avatar {
   width: 22px;
@@ -278,6 +333,7 @@ body {
   color: #2f2015;
 }
 
+.new_library_btn,
 .new_repo_btn {
   background: #b4531a;
   color: #ffffff;
@@ -289,6 +345,7 @@ body {
   box-shadow: 0 8px 18px rgba(180, 83, 26, 0.22);
 }
 
+.new_library_btn,
 .new_repo_btn:hover {
   background: #923f12;
 }
@@ -324,7 +381,7 @@ body {
   background: #ead7bd;
 }
 
-/* Repository */
+/* Library / Repository */
 
 .repository_card {
   border: 1px solid #e2d3bc;
@@ -410,12 +467,72 @@ body {
     gap: 12px;
   }
 
-  .repository_item {
+  .repository_item,
+  .library_item {
     align-items: flex-start;
   }
 
-  .repo_graph {
+  .repo_graph,
+  .library_graph {
     display: none;
   }
 }
 
+
+
+/* Library list aliases */
+
+.library_card {
+  border: 1px solid #e2d3bc;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fffaf0;
+  box-shadow: 0 14px 36px rgba(59, 38, 24, 0.12);
+}
+
+.library_card_header {
+  padding: 16px 20px;
+  background: #f2e3c9;
+  border-bottom: 1px solid #e2d3bc;
+  display: flex;
+  justify-content: space-between;
+  color: #2f2015;
+}
+
+.library_item {
+  padding: 20px 22px;
+  border-bottom: 1px solid #e2d3bc;
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  background: #fffaf0;
+}
+
+.library_item:hover {
+  background: #fff4df;
+}
+
+.library_item:last-child {
+  border-bottom: none;
+}
+
+.library_item h3 {
+  margin: 0 0 10px;
+  color: #3b2618;
+  font-size: 17px;
+}
+
+.library_meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  color: #735f4c;
+  font-size: 13px;
+}
+
+.library_graph {
+  width: 130px;
+  height: 28px;
+  border-bottom: 2px solid #b4531a;
+  opacity: 0.85;
+}

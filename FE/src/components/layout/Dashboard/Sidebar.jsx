@@ -1,20 +1,22 @@
 import Logo from "../../../assets/logo/Logo.jsx";
+import "../../../assets/icons/themify-icons-font/themify-icons/themify-icons.css";
+
 function Sidebar({ isOpen, onClose }) {
   const menuItems = [
-    { icon: "🏠", label: "Home" },
-    { icon: "📁", label: "My repositories" },
-    { icon: "🔀", label: "Pull requests" },
-    { icon: "🧩", label: "Projects" },
-    { icon: "💬", label: "Discussions" },
-    { icon: "🤖", label: "Copilot" },
+    { icon: "ti-home", label: "Home" },
+    { icon: "ti-folder", label: "My libraries" },
+    { icon: "ti-upload", label: "Uploads" },
+    { icon: "ti-book", label: "Subjects" },
+    { icon: "ti-comments", label: "AI Chat" },
+    { icon: "ti-settings", label: "Settings" },
   ];
 
-  const topRepositories = [
+  const topLibraries = [
     "AI-student-hub",
-    "To-do-list",
-    "portfolio-webpage",
-    "Pokedex",
-    "smart-home-system",
+    "JavaScript-notes",
+    "Software-engineering",
+    "Business-analysis",
+    "Final-exam-review",
   ];
 
   return (
@@ -34,7 +36,7 @@ function Sidebar({ isOpen, onClose }) {
             className={`sidebar_link ${index === 1 ? "active" : ""}`}
             key={item.label}
           >
-            <span>{item.icon}</span>
+            <i className={item.icon}></i>
             <span>{item.label}</span>
           </a>
         ))}
@@ -42,16 +44,16 @@ function Sidebar({ isOpen, onClose }) {
 
       <div className="sidebar_divider" />
 
-      <div className="top_repo_header">
-        <p>Most access storage</p>
+      <div className="top_library_header">
+        <p>Most accessed libraries</p>
         <button>⌕</button>
       </div>
 
-      <div className="repo_list">
-        {topRepositories.map((repo) => (
-          <a href="#" className="repo_item" key={repo}>
-            <span className="avatar"></span>
-            <span>{repo}</span>
+      <div className="library_shortcut_list">
+        {topLibraries.map((library) => (
+          <a href="#" className="library_shortcut_item" key={library}>
+            <i className="ti-archive"></i>
+            <span>{library}</span>
           </a>
         ))}
       </div>

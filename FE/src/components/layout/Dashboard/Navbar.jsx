@@ -6,9 +6,11 @@ function Navbar({ onOpenSidebar }) {
           ☰
         </button>
       </div>
+
       <div className="search_box">
-        <input type="text" placeholder="Type / to search" />
+        <input type="text" placeholder="Search your library..." />
       </div>
+
       <div className="nav_actions">
         <button>＋</button>
         <button>◉</button>
@@ -18,4 +20,5 @@ function Navbar({ onOpenSidebar }) {
     </header>
   );
 }
+
 export default Navbar;
