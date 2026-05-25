@@ -24,7 +24,12 @@ function OTPVerification() {
       const res = await axios.post("http://localhost:5000/api/auth/verify-otp", { email, otp });
       if (res.data.data.requiresSetup) {
         // Tiếp tục truyền email sang trang hoàn tất hồ sơ
-        navigate('/complete-profile', { state: { email: email } });
+        navigate('/complete-profile',{
+          state: {
+            email: res.data.data.email,
+            setupToken: res.data.data.setupToken
+          }
+        });
       }
     } catch (error) {
       setErrorMsg(error.response?.data?.message || "Invalid OTP.");

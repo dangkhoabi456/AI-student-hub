@@ -19,15 +19,37 @@ exports.verifyOTP = async (req, res) => {
     try {
         const { email, otp } = req.body;
 
-        // 1. Chuẩn hóa dữ liệu bộ nhớ tuyệt đối
-        // Chuyển email về in thường và ép otp về kiểu chuỗi nguyên bản
+        // ======================================================
+        // 1. CHUẨN HÓA EMAIL VÀ OTP
+        // ======================================================
         const cleanEmail = email.toLowerCase().trim();
-        const cleanOtp = String(otp).trim();
+        const cleanOtp = String(otp || "").trim();
 
-        // In ra Terminal của Backend để bạn theo dõi Dry Run trực tiếp
         console.log(`[DRY RUN] Đang kiểm tra: Email="${cleanEmail}", OTP="${cleanOtp}"`);
 
-        // 2. Tìm OTP trong DB với cú pháp chuẩn
+        // ======================================================
+        // 2. KIỂM TRA TÀI KHOẢN CÓ ĐANG CHỜ COMPLETE PROFILE KHÔNG
+        // ======================================================
+        const { data: user, error: userError } = await supabase
+            .from('profiles')
+            .select('id, email, password_hash')
+            .eq('email', cleanEmail)
+            .maybeSingle();
+
+        if (userError) {
+            throw userError;
+        }
+
+        if (!user || user.password_hash !== 'GOOGLE_SSO_NO_PASSWORD') {
+            return res.status(400).json({
+                status: 'error',
+                message: 'Tài khoản không ở trạng thái chờ hoàn tất hồ sơ.'
+            });
+        }
+
+        // ======================================================
+        // 3. KIỂM TRA OTP CÓ ĐÚNG VÀ CÒN HẠN KHÔNG
+        // ======================================================
         const { data: otpRecord, error } = await supabase
             .from('otp_tokens')
             .select('*')
@@ -38,20 +60,59 @@ exports.verifyOTP = async (req, res) => {
             .limit(1)
             .maybeSingle();
 
-        if (error) console.error("🔴 Lỗi truy vấn Supabase:", error);
+        if (error) {
+            console.error("🔴 Lỗi truy vấn Supabase:", error);
+            throw error;
+        }
+
         console.log(`[DRY RUN] Record tìm thấy:`, otpRecord);
 
         if (!otpRecord) {
-            return res.status(400).json({ status: 'error', message: 'Mã OTP không hợp lệ hoặc đã hết hạn.' });
+            return res.status(400).json({
+                status: 'error',
+                message: 'Mã OTP không hợp lệ hoặc đã hết hạn.'
+            });
         }
 
-        // Xóa OTP sau khi dùng
-        await supabase.from('otp_tokens').delete().eq('id', otpRecord.id);
+        // ======================================================
+        // 4. XÓA OTP SAU KHI DÙNG
+        // ======================================================
+        await supabase
+            .from('otp_tokens')
+            .delete()
+            .eq('id', otpRecord.id);
 
-        res.status(200).json({ status: 'success', data: { email, requiresSetup: true } });
+        // ======================================================
+        // 5. TẠO SETUP TOKEN SAU KHI OTP ĐÚNG
+        // ======================================================
+        const setupToken = jwt.sign(
+            {
+                email: cleanEmail,
+                type: 'complete_setup'
+            },
+            process.env.JWT_SECRET,
+            {
+                expiresIn: '15m'
+            }
+        );
+
+        // ======================================================
+        // 6. TRẢ SETUP TOKEN VỀ FRONTEND
+        // ======================================================
+        res.status(200).json({
+            status: 'success',
+            data: {
+                email: cleanEmail,
+                requiresSetup: true,
+                setupToken: setupToken
+            }
+        });
     } catch (error) {
         console.error("🔴 Lỗi hệ thống verifyOTP:", error);
-        res.status(500).json({ status: 'error', message: error.message });
+        res.status(500).json({
+            status: 'error',
+            message: error.message
+        });
     }
 };
 exports.checkUsername = async (req, res) => {
@@ -73,58 +134,144 @@ exports.checkUsername = async (req, res) => {
 
 exports.completeSetup = async (req, res) => {
     try {
-        const { email, username, password } = req.body;
+        const { email, username, password, setupToken } = req.body;
 
-        // 1. Dry Run kiểm tra Username
-        const { data: existingUser } = await supabase
+        // ======================================================
+        // 1. CHUẨN HÓA EMAIL
+        // ======================================================
+        const cleanEmail = email.toLowerCase().trim();
+        const cleanUsername = username.trim();
+
+        // ======================================================
+        // 2. KIỂM TRA SETUP TOKEN
+        // ======================================================
+        // Token này chỉ có sau khi user nhập OTP đúng.
+        // Nếu không có token này thì không cho complete profile.
+        let payload;
+
+        try {
+            payload = jwt.verify(setupToken, process.env.JWT_SECRET);
+        } catch (tokenError) {
+            return res.status(401).json({
+                status: "error",
+                message: "Phiên xác minh OTP không hợp lệ hoặc đã hết hạn."
+            });
+        }
+
+        if (payload.type !== "complete_setup" || payload.email !== cleanEmail) {
+            return res.status(401).json({
+                status: "error",
+                message: "Phiên xác minh OTP không hợp lệ hoặc đã hết hạn."
+            });
+        }
+
+        // ======================================================
+        // 3. KIỂM TRA USERNAME
+        // ======================================================
+        if (!cleanUsername || cleanUsername.length < 3) {
+            return res.status(400).json({
+                status: "error",
+                message: "Username phải có ít nhất 3 ký tự."
+            });
+        }
+
+        const { data: existingUser, error: existingError } = await supabase
             .from('profiles')
             .select('id')
-            .eq('username', username)
-            .neq('email', email) // Bỏ qua record hiện tại của user này
+            .eq('username', cleanUsername)
+            .neq('email', cleanEmail)
             .maybeSingle();
 
+        if (existingError) {
+            throw existingError;
+        }
+
         if (existingUser) {
-            return res.status(400).json({ status: 'error', message: 'Username đã được sử dụng.' });
+            return res.status(400).json({
+                status: 'error',
+                message: 'Username đã được sử dụng.'
+            });
         }
 
-        // 2. Logic Mật khẩu (BẮT BUỘC)
+        // ======================================================
+        // 4. KIỂM TRA PASSWORD
+        // ======================================================
         if (!password || password.trim() === "") {
-            return res.status(400).json({ status: 'error', message: 'Mật khẩu là thông tin bắt buộc.' });
+            return res.status(400).json({
+                status: 'error',
+                message: 'Mật khẩu là thông tin bắt buộc.'
+            });
         }
 
-        // Validate: >= 8 ký tự, 1 thường, 1 số, 1 đặc biệt
         const regex = /^(?=.*[a-z])(?=.*\d)(?=.*[^A-Za-z0-9])\S{8,}$/;
+
         if (!regex.test(password)) {
-            return res.status(400).json({ status: 'error', message: 'Mật khẩu không đạt yêu cầu bảo mật.' });
+            return res.status(400).json({
+                status: 'error',
+                message: 'Mật khẩu không đạt yêu cầu bảo mật.'
+            });
         }
 
+        // ======================================================
+        // 5. HASH PASSWORD
+        // ======================================================
         const salt = await bcrypt.genSalt(10);
         const passwordHash = await bcrypt.hash(password, salt);
 
-        // 3. Cập nhật dữ liệu và lấy lại id của User để cấp Token
+        // ======================================================
+        // 6. UPDATE PROFILE
+        // ======================================================
+        // Chỉ update account đang có password_hash = GOOGLE_SSO_NO_PASSWORD.
+        // Như vậy account đã setup rồi sẽ không bị ghi đè.
         const { data: updatedUser, error: updateError } = await supabase
             .from('profiles')
-            .update({ username: username, password_hash: passwordHash })
-            .eq('email', email)
+            .update({
+                username: cleanUsername,
+                password_hash: passwordHash
+            })
+            .eq('email', cleanEmail)
+            .eq('password_hash', 'GOOGLE_SSO_NO_PASSWORD')
             .select('id, email')
-            .single();
+            .maybeSingle();
 
-        if (updateError) throw updateError;
+        if (updateError) {
+            throw updateError;
+        }
 
-        // 4. Sinh Access Token để vào thẳng Dashboard
+        if (!updatedUser) {
+            return res.status(400).json({
+                status: "error",
+                message: "Không thể hoàn tất hồ sơ. Tài khoản có thể đã được thiết lập trước đó."
+            });
+        }
+
+        // ======================================================
+        // 7. TẠO ACCESS TOKEN ĐỂ FRONTEND VÀO DASHBOARD
+        // ======================================================
         const accessToken = jwt.sign(
-            { userId: updatedUser.id, email: updatedUser.email },
+            {
+                userId: updatedUser.id,
+                email: updatedUser.email
+            },
             process.env.JWT_SECRET,
-            { expiresIn: '1h' }
+            {
+                expiresIn: '24h'
+            }
         );
 
         res.status(200).json({
             status: 'success',
             message: 'Cập nhật thành công',
-            data: { accessToken } // Trả token về cho Frontend
+            data: {
+                accessToken
+            }
         });
     } catch (error) {
-        res.status(500).json({ status: 'error', message: error.message });
+        console.error("🔴 Lỗi completeSetup:", error);
+        res.status(500).json({
+            status: 'error',
+            message: error.message
+        });
     }
 };
 
@@ -220,5 +367,81 @@ exports.forgotPassword = async (req, res) => {
     } catch (error) {
         console.error("🔴 Lỗi forgotPassword:", error);
         res.status(500).json({ status: 'error', message: error.message });
+    }
+};
+exports.resetPassword = async (req, res) => {
+    try {
+        const { email, otp, newPassword } = req.body;
+
+        const cleanEmail = email.toLowerCase().trim();
+        const cleanOtp = String(otp || "").trim();
+
+        const passwordRegex = /^(?=.*[a-z])(?=.*\d)(?=.*[^A-Za-z0-9])\S{8,}$/;
+        if (!passwordRegex.test(newPassword)) {
+            return res.status(400).json({
+                status: "error",
+                message: "Mật khẩu cần >= 8 ký tự, có ít nhất 1 chữ thường, 1 số, 1 ký tự đặc biệt và không chứa khoảng trắng."
+            });
+        }
+
+        const { data: user, error: userError } = await supabase
+            .from("profiles")
+            .select("id, email, password_hash")
+            .eq("email", cleanEmail)
+            .maybeSingle();
+
+        if (userError) throw userError;
+
+        if (!user || user.password_hash === "GOOGLE_SSO_NO_PASSWORD") {
+            return res.status(400).json({
+                status: "error",
+                message: "Thông tin khôi phục không hợp lệ hoặc tài khoản không hỗ trợ đặt lại mật khẩu."
+            });
+        }
+
+        const { data: otpRecord, error: otpError } = await supabase
+            .from("otp_tokens")
+            .select("*")
+            .eq("email", cleanEmail)
+            .eq("otp_code", cleanOtp)
+            .gte("expires_at", new Date().toISOString())
+            .order("created_at", { ascending: false })
+            .limit(1)
+            .maybeSingle();
+
+        if (otpError) throw otpError;
+
+        if (!otpRecord) {
+            return res.status(400).json({
+                status: "error",
+                message: "Mã OTP không hợp lệ hoặc đã hết hạn."
+            });
+        }
+
+        const salt = await bcrypt.genSalt(10);
+        const passwordHash = await bcrypt.hash(newPassword, salt);
+
+        const { error: updateError } = await supabase
+            .from("profiles")
+            .update({ password_hash: passwordHash })
+            .eq("id", user.id);
+
+        if (updateError) throw updateError;
+
+        await supabase
+            .from("otp_tokens")
+            .delete()
+            .eq("id", otpRecord.id);
+
+        res.status(200).json({
+            status: "success",
+            message: "Đổi mật khẩu thành công. Vui lòng đăng nhập lại."
+        });
+    } catch (error) {
+        console.error("🔴 Lỗi resetPassword:", error);
+        res.status(500).json({
+            status: "error",
+            message: error.message
+        });
     }
 };
