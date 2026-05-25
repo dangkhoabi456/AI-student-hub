@@ -93,4 +93,4 @@ function RepositoryItem({ name, language, time }) {
   );
 }
 
-export default DashboardLayout;
+export default Dashboard;
