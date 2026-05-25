@@ -2,10 +2,6 @@ import { useState } from "react";
 import Sidebar from "./Sidebar.jsx";
 import Navbar from "./Navbar.jsx";
 import "./Dashboard.css";
-<<<<<<< HEAD:FE/src/components/layout/Dashboard/Dashboard.jsx
-=======
-import LibraryPage from "../../pages/LibraryPage/LibraryPage.jsx";
->>>>>>> b6bb1f067da34c220532fbb8b968297429d304ba:FE/src/components/layout/Dashboard/DashboradLayout.jsx
 
 function Dashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -28,7 +24,6 @@ function Dashboard() {
         <Navbar onOpenSidebar={() => setIsSidebarOpen(true)} />
 
         <main className="content">
-<<<<<<< HEAD:FE/src/components/layout/Dashboard/Dashboard.jsx
 
           <div className="filter_box">
             <input type="text" value="contributed-by:@me" readOnly />
@@ -72,16 +67,12 @@ function Dashboard() {
             />
           </section> */
 
-=======
-          <LibraryPage />
->>>>>>> b6bb1f067da34c220532fbb8b968297429d304ba:FE/src/components/layout/Dashboard/DashboradLayout.jsx
-        </main>
-      </div>
-    </div>
+        </main >
+      </div >
+    </div >
   );
 }
 
-<<<<<<< HEAD:FE/src/components/layout/Dashboard/Dashboard.jsx
 function RepositoryItem({ name, language, time }) {
   return (
     <div className="repository_item">
@@ -103,7 +94,3 @@ function RepositoryItem({ name, language, time }) {
 }
 
 export default DashboardLayout;
-=======
-export default Dashboard;
-
->>>>>>> b6bb1f067da34c220532fbb8b968297429d304ba:FE/src/components/layout/Dashboard/DashboradLayout.jsx
