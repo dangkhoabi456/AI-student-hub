@@ -13,7 +13,9 @@ function CompleteProfile() {
   const [errorMsg, setErrorMsg] = useState("");
 
   const email = location.state?.email;
-  if (!email) {
+  const setupToken = location.state?.setupToken;
+
+  if (!email || !setupToken) {
     return <Navigate to="/login" replace />;
   }
 
@@ -25,7 +27,7 @@ function CompleteProfile() {
     const delayDebounceFn = setTimeout(async () => {
       if (formData.username.trim() !== "") {
         try {
-          const res = await axios.get(`http://localhost:5000/api/auth/check-username?username=${formData.username}`);
+          const res = await axios.get(`http://localhost:5000/api/auth/check-username?username=${encodeURIComponent(formData.username)}`);
           if (res.data.exists) {
             setUsernameStatus("❌ Username này đã tồn tại.");
           } else {
@@ -54,7 +56,8 @@ function CompleteProfile() {
       const response = await axios.post("http://localhost:5000/api/auth/complete-setup", {
         email: email,
         username: formData.username,
-        password: formData.password
+        password: formData.password,
+        setupToken: setupToken
       });
 
       const accessToken = response.data.data.accessToken;

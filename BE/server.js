@@ -11,7 +11,7 @@ const app = express();
 
 // 1. Cấu hình Middleware CORS để cho phép Frontend (Vite - 5173) gọi API
 app.use(cors({
-    origin: 'http://localhost:5173', // Địa chỉ của Frontend
+    origin: ['http://localhost:5173', 'http://localhost:5174'], // Địa chỉ của Frontend
     credentials: true // Cho phép gửi token/cookie nếu có
 }));
 

@@ -65,7 +65,7 @@ function Dashboard() {
               language="Java"
               time="Updated on Mar 15"
             />
-          </section> */
+          </section>
 
         </main >
       </div >
