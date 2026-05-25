@@ -1,21 +1,28 @@
+/* Container chung */
 .form_input_group {
   position: relative;
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
 }
 
+/* Định dạng ô input gốc của bạn */
 .form_input_group .form_input {
   background-color: #ffffff;
   color: #452720;
   width: 100%;
-  padding: 20px 5px 5px 10px;
+  /* Padding phải 45px để nhường chỗ cho icon con mắt */
+  padding: 20px 45px 5px 10px;
   outline: 0;
-  border: 5px solid rgb(73 42 23 / 59%);
+  border: 2px solid rgba(73, 42, 23, 0.59);
   border-radius: 10px;
   font-size: medium;
   box-sizing: border-box;
 }
 
-.form_input_group .form_input + span {
+/* Định dạng nhãn (Label) trôi nổi */
+.form_input_group .form_input+span {
   color: #452720;
   position: absolute;
   left: 10px;
@@ -23,17 +30,61 @@
   font-size: 0.9em;
   cursor: text;
   transition: 0.3s ease;
+  pointer-events: none;
+  /* Đảm bảo chữ không chặn click chuột vào input */
 }
 
-.form_input-group .form_input:placeholder-shown + span {
-  top: 12.5px;
+/* Hiệu ứng khi input trống */
+.form_input_group .form_input:placeholder-shown+span {
+  top: 14px;
   font-size: 0.9em;
 }
 
-.form_input_group .form_input:focus + span,
-.form_input_group .form_input:valid + span {
+/* Hiệu ứng khi input đang được focus hoặc có chữ */
+.form_input_group .form_input:focus+span,
+.form_input_group .form_input:valid+span {
   color: #6e2c0a;
-  top: 5px;
-  font-size: 0.7em;
+  top: -9px;
+  left: 8px;
+  font-size: 0.75em;
   font-weight: 600;
+  background-color: #fff8e7;
+  /* Trùng màu nền của trang để che đi phần border */
+  padding: 0 5px;
+}
+
+/* Định dạng nút con mắt (Loại bỏ viền và nền) */
+.toggle_password_icon_btn {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  /* Xóa nền */
+  border: none;
+  /* Xóa viền */
+  cursor: pointer;
+  font-size: 1.2em;
+  color: #7c6a58;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  outline: none;
+  z-index: 2;
+}
+
+/* Hiệu ứng khi di chuột vào con mắt */
+.toggle_password_icon_btn:hover {
+  opacity: 0.6;
+}
+
+/* GHI ĐÈ MÀU NỀN TỰ ĐỘNG ĐIỀN CỦA TRÌNH DUYỆT */
+.form_input:-webkit-autofill,
+.form_input:-webkit-autofill:hover,
+.form_input:-webkit-autofill:focus,
+.form_input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px #ffffff inset !important;
+  -webkit-text-fill-color: #452720 !important;
+  transition: background-color 5000s ease-in-out 0s;
 }

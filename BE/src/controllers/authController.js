@@ -127,3 +127,98 @@ exports.completeSetup = async (req, res) => {
         res.status(500).json({ status: 'error', message: error.message });
     }
 };
+
+exports.login = async (req, res) => {
+    try {
+        const { username, password } = req.body;
+
+        // 1. Phân giải truy vấn: Tìm kiếm linh hoạt theo Username HOẶC Email
+        const { data: user, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .or(`username.eq.${username},email.eq.${username}`)
+            .maybeSingle();
+
+        if (error) throw error;
+
+        // Trạng thái: Không tìm thấy con trỏ user
+        if (!user) {
+            return res.status(401).json({ status: 'error', message: 'Tài khoản không tồn tại.' });
+        }
+
+        // Trạng thái: Chặn tài khoản chưa setup pass (chỉ mới login Google 1 nửa)
+        if (user.password_hash === 'GOOGLE_SSO_NO_PASSWORD') {
+            return res.status(401).json({ status: 'error', message: 'Tài khoản này chưa hoàn tất thiết lập mật khẩu. Vui lòng đăng nhập qua Google.' });
+        }
+
+        // 2. Phân tích vùng nhớ Password
+        // Nạp chuỗi thô (password) và chuỗi hash từ DB (user.password_hash) vào thuật toán bcrypt
+        const isMatch = await bcrypt.compare(password, user.password_hash);
+
+        if (!isMatch) {
+            return res.status(401).json({ status: 'error', message: 'Mật khẩu không chính xác.' });
+        }
+
+        // 3. Cấp phát Token
+        const accessToken = jwt.sign(
+            { userId: user.id, email: user.email },
+            process.env.JWT_SECRET,
+            { expiresIn: '24h' }
+        );
+
+        res.status(200).json({ status: 'success', data: { accessToken } });
+    } catch (error) {
+        console.error("🔴 Lỗi hệ thống Login:", error);
+        res.status(500).json({ status: 'error', message: error.message });
+    }
+};
+
+exports.forgotPassword = async (req, res) => {
+    try {
+        const { email } = req.body;
+        const cleanEmail = email.toLowerCase().trim();
+
+        // 1. Truy xuất con trỏ User trong bộ nhớ DB
+        const { data: user } = await supabase
+            .from('profiles')
+            .select('id, email, password_hash')
+            .eq('email', cleanEmail)
+            .maybeSingle();
+
+        if (!user) {
+            return res.status(404).json({ status: 'error', message: 'Email này chưa được đăng ký trong hệ thống.' });
+        }
+        if (user.password_hash === 'GOOGLE_SSO_NO_PASSWORD') {
+            return res.status(400).json({ status: 'error', message: 'Tài khoản này đăng nhập bằng Google. Không thể đổi mật khẩu.' });
+        }
+
+        // 2. Cấp phát OTP vào bảng otp_tokens
+        const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+        const expiresAt = new Date(Date.now() + 10 * 60000); // 10 phút
+
+        await supabase.from('otp_tokens').insert([{
+            email: cleanEmail,
+            otp_code: otpCode,
+            expires_at: expiresAt.toISOString()
+        }]);
+
+        // 3. Khởi tạo cấu trúc gửi Mail (Tái sử dụng config hiện có)
+        const transporter = require('nodemailer').createTransport({
+            host: process.env.EMAIL_HOST,
+            port: parseInt(process.env.EMAIL_PORT) || 2525,
+            auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS }
+        });
+
+        await transporter.sendMail({
+            from: process.env.EMAIL_USER,
+            to: cleanEmail,
+            subject: 'AI StudyHub - Password Reset Code',
+            text: `Mã OTP khôi phục mật khẩu của bạn là: ${otpCode}. Mã hết hạn sau 10 phút.`
+        });
+
+        res.status(200).json({ status: 'success', message: 'Mã OTP đã được gửi đến email.' });
+    } catch (error) {
+        console.error("🔴 Lỗi forgotPassword:", error);
+        res.status(500).json({ status: 'error', message: error.message });
+    }
+};

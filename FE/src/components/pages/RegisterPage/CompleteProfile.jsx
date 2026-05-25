@@ -1,18 +1,26 @@
 import React, { useState, useEffect } from "react";
 import FormInput from "../../common/FormInput/FormInput.jsx";
 import axios from "axios";
+import { useNavigate, useLocation, Navigate } from "react-router-dom";
 import "./Register.css";
 
-function CompleteProfile({ email }) {
+function CompleteProfile() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const [formData, setFormData] = useState({ username: "", password: "" });
   const [usernameStatus, setUsernameStatus] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
+
+  const email = location.state?.email;
+  if (!email) {
+    return <Navigate to="/login" replace />;
+  }
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Kỹ thuật Debounce 500ms để check Username realtime
   useEffect(() => {
     const delayDebounceFn = setTimeout(async () => {
       if (formData.username.trim() !== "") {
@@ -38,7 +46,6 @@ function CompleteProfile({ email }) {
     e.preventDefault();
     setErrorMsg("");
 
-    // Validation trước khi gửi
     if (!formData.username) return setErrorMsg("Username là bắt buộc!");
     if (usernameStatus.includes("❌")) return setErrorMsg("Vui lòng chọn Username khác.");
     if (!formData.password) return setErrorMsg("Mật khẩu là bắt buộc!");
@@ -50,12 +57,10 @@ function CompleteProfile({ email }) {
         password: formData.password
       });
 
-      // Bắt Token từ Backend và lưu vào bộ nhớ trình duyệt
       const accessToken = response.data.data.accessToken;
       localStorage.setItem("accessToken", accessToken);
 
-      // Chuyển thẳng vào Dashboard thay vì về trang chủ
-      window.location.href = "/dashboard";
+      navigate("/dashboard");
     } catch (error) {
       setErrorMsg(error.response?.data?.message || "Lỗi cập nhật.");
     }
@@ -66,13 +71,13 @@ function CompleteProfile({ email }) {
       <form className="register_card" onSubmit={handleSubmit}>
         <p className="register_title">Hoàn tất hồ sơ</p>
 
-        <FormInput 
-          type="text" 
-          name="username" 
-          value={formData.username} 
-          onChange={handleChange} 
-          label="Username *" 
-          required 
+        <FormInput
+          type="text"
+          name="username"
+          value={formData.username}
+          onChange={handleChange}
+          label="Username *"
+          required
         />
         <span style={{ fontSize: "13px", color: usernameStatus.includes("✅") ? "green" : "red", display: 'block', marginTop: '-15px' }}>
           {usernameStatus}
@@ -81,14 +86,14 @@ function CompleteProfile({ email }) {
         <p className="register_message" style={{ fontSize: "13px", color: "#7c6a58" }}>
           Mật khẩu cần &gt;= 8 ký tự, 1 chữ thường, 1 số, 1 ký tự đặc biệt.
         </p>
-        
-        <FormInput 
-          type="password" 
-          name="password" 
-          value={formData.password} 
-          onChange={handleChange} 
-          label="Password *" 
-          required 
+
+        <FormInput
+          type="password"
+          name="password"
+          value={formData.password}
+          onChange={handleChange}
+          label="Password *"
+          required
         />
 
         {errorMsg && <p style={{ color: "red", textAlign: "center", fontSize: "14px", margin: "0" }}>{errorMsg}</p>}

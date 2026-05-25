@@ -1,61 +1,31 @@
-import React, { useState } from 'react';
-import RegisterPage from './components/pages/RegisterPage/RegisterGoogle.jsx';
-import RegisterGoogle from "./components/pages/RegisterPage/RegisterGoogle.jsx";
-// import EnterUserNamePass from "./components/pages/RegisterPage/EnterUserNamePass.jsx";
-import HeroSection from "./components/pages/HeroSection/HeroSection.jsx";
-import { BrowserRouter, Routes, Route } from "react-router";
+import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
+// Import các Component
 import LoginPage from "./components/pages/LoginPage/LoginPage.jsx";
+import RegisterPage from './components/pages/RegisterPage/RegisterGoogle.jsx';
 import CompleteProfile from "./components/pages/RegisterPage/CompleteProfile.jsx";
-import OTPVerification from "./components/pages/RegisterPage/OTPVerification.jsx"; // File mới
+import OTPVerification from "./components/pages/RegisterPage/OTPVerification.jsx"; 
+import DashboardLayout from "./components/layout/Dashboard/Dashboard.jsx";
+import ForgotPassword from "./components/pages/LoginPage/ForgotPassword.jsx";
 
 function App() {
-  const [currentView, setCurrentView] = useState("login");
-  const [setupEmail, setSetupEmail] = useState("");
-
-  const handleSwitchView = (viewName) => {
-    setCurrentView(viewName);
-  };
-
-  const handleRequireOTP = (email) => {
-    setSetupEmail(email);
-    handleSwitchView("otp");
-  };
-
-  const handleRequireSetup = (email) => {
-    setSetupEmail(email);
-    handleSwitchView("completeProfile");
-  };
-
   return (
-
-    <div className="app-container">
-      {currentView === "login" && (
-        <LoginPage
-          onSwitchToRegister={() => handleSwitchView("register")}
-          onRequireOTP={handleRequireOTP}
-        />
-      )}
-      {currentView === "register" && (
-        <RegisterPage
-          onSwitchToLogin={() => handleSwitchView("login")}
-          onRequireOTP={handleRequireOTP}
-        />
-      )}
-      {currentView === "otp" && (
-        <OTPVerification
-          email={setupEmail}  
-          onSuccess={() => handleRequireSetup(setupEmail)}
-        />
-      )}
-      {currentView === "completeProfile" && (
-        <CompleteProfile
-          email={setupEmail}
-          onSuccess={() => { window.location.href = "/dashboard"; }}
-        />
-      )}
-    </div>
-
+    <BrowserRouter>
+      <div className="app-container">
+        <Routes>
+          {/* Mặc định vào thẳng trang Login */}
+          <Route path="/" element={<Navigate to="/login" replace />} />
+          
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/verify-otp" element={<OTPVerification />} />
+          <Route path="/complete-profile" element={<CompleteProfile />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/dashboard" element={<DashboardLayout />} />
+        </Routes>
+      </div>
+    </BrowserRouter>
   );
 }
 

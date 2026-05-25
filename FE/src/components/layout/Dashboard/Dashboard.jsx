@@ -1,8 +1,7 @@
 import { useState } from "react";
-import Sidebar from "./Sidebar";
-import Navbar from "./Navbar";
+import Sidebar from "./Sidebar.jsx";
+import Navbar from "./Navbar.jsx";
 import "./Dashboard.css";
-import PersonalProfilePage from "../../pages/PersonalProfilePage/PersonalProfilePage.jsx";
 
 function DashboardLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -25,11 +24,6 @@ function DashboardLayout() {
         <Navbar onOpenSidebar={() => setIsSidebarOpen(true)} />
 
         <main className="content">
-          <PersonalProfilePage />
-          {/* <div className="page_header">
-            <h2>My contributions</h2>
-            <button className="new_repo_btn">New repository</button>
-          </div>
 
           <div className="filter_box">
             <input type="text" value="contributed-by:@me" readOnly />
@@ -71,7 +65,7 @@ function DashboardLayout() {
               language="Java"
               time="Updated on Mar 15"
             />
-          </section> */}
+          </section> */
 
         </main>
       </div>
@@ -79,24 +73,24 @@ function DashboardLayout() {
   );
 }
 
-// function RepositoryItem({ name, language, time }) {
-//   return (
-//     <div className="repository_item">
-//       <div>
-//         <h3>{name}</h3>
+function RepositoryItem({ name, language, time }) {
+  return (
+    <div className="repository_item">
+      <div>
+        <h3>{name}</h3>
 
-//         <div className="repo_meta">
-//           <span className="language_dot"></span>
-//           <span>{language}</span>
-//           <span>☆ 0</span>
-//           <span>⑂ 0</span>
-//           <span>{time}</span>
-//         </div>
-//       </div>
+        <div className="repo_meta">
+          <span className="language_dot"></span>
+          <span>{language}</span>
+          <span>☆ 0</span>
+          <span>⑂ 0</span>
+          <span>{time}</span>
+        </div>
+      </div>
 
-//       <div className="repo_graph"></div>
-//     </div>
-//   );
-// }
+      <div className="repo_graph"></div>
+    </div>
+  );
+}
 
 export default DashboardLayout;

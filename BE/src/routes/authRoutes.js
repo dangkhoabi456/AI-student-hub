@@ -6,5 +6,7 @@ router.post('/google', authController.googleLogin);
 router.post('/verify-otp', authController.verifyOTP);
 router.get('/check-username', authController.checkUsername);
 router.post('/complete-setup', authController.completeSetup);
+router.post('/login', authController.login);
+router.post('/forgot-password', authController.forgotPassword);
 
 module.exports = router;

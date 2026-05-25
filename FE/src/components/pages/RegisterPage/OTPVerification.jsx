@@ -1,18 +1,30 @@
 import React, { useState } from "react";
 import FormInput from "../../common/FormInput/FormInput.jsx";
 import axios from "axios";
+import { useNavigate, useLocation, Navigate } from "react-router-dom";
 import "./Register.css";
 
-function OTPVerification({ email, onSuccess }) {
+function OTPVerification() {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [otp, setOtp] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
+
+  // Trích xuất email từ History State
+  const email = location.state?.email;
+
+  // Nếu người dùng truy cập trực tiếp bằng URL /verify-otp mà không qua form, đẩy về login
+  if (!email) {
+    return <Navigate to="/login" replace />;
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const res = await axios.post("http://localhost:5000/api/auth/verify-otp", { email, otp });
       if (res.data.data.requiresSetup) {
-        onSuccess();
+        // Tiếp tục truyền email sang trang hoàn tất hồ sơ
+        navigate('/complete-profile', { state: { email: email } });
       }
     } catch (error) {
       setErrorMsg(error.response?.data?.message || "Invalid OTP.");
