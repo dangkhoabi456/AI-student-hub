@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import FormInput from "../../common/FormInput/FormInput.jsx";
 import axios from "axios";
 import { useNavigate, useLocation, Navigate } from "react-router-dom";
 import "./LoginPage.css";
+
 
 function ResetPassword() {
   const navigate = useNavigate();

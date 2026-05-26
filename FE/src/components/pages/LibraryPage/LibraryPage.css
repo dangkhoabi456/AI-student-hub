@@ -126,6 +126,7 @@
 }
 
 .library_tabs {
+  justify-content: space-evenly;
   margin: 22px 0;
   padding: 8px;
   background: #f2e3c9;
@@ -447,4 +448,13 @@
   .library_title_row h1 {
     font-size: 24px;
   }
+}
+
+.upload_file_btn {
+  position: relative;
+  cursor: pointer;
+}
+
+.upload_file_btn input {
+  display: none;
 }

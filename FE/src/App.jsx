@@ -1,4 +1,3 @@
-import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import LoginPage from "./components/pages/LoginPage/LoginPage.jsx";
@@ -24,6 +23,7 @@ function App() {
           <Route path="/complete-profile" element={<CompleteProfile />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password-otp" element={<ResetPassword />} />
+
           <Route path="/study-hub-chatbot" element={<ChatBot />} />
           <Route
             path="/dashboard"
