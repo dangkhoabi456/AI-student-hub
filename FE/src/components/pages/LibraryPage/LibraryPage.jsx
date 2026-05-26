@@ -1,8 +1,9 @@
+import { useState } from "react";
 import "./LibraryPage.css";
 import "../../../assets/icons/themify-icons-font/themify-icons/themify-icons.css";
 
 function LibraryPage() {
-  const libraryItems = [
+  const [libraryItems, setLibraryItems] = useState([
     {
       type: "folder",
       name: "Documents",
@@ -10,30 +11,13 @@ function LibraryPage() {
       updatedAt: "5 hours ago",
     },
     {
-      type: "folder",
-      name: "Summaries",
-      note: "AI-generated study summaries",
-      updatedAt: "yesterday",
-    },
-    {
-      type: "file",
-      name: "Software Engineering Notes.pdf",
-      note: "Requirements, design, testing, maintenance",
-      updatedAt: "2 days ago",
-    },
-    {
       type: "file",
       name: "React Hooks Practice.docx",
       note: "useState, useEffect, useRef, useContext",
       updatedAt: "last week",
     },
-    {
-      type: "file",
-      name: "Business Analysis Report.xlsx",
-      note: "Practice data and analysis table",
-      updatedAt: "last week",
-    },
-  ];
+
+  ]);
 
   const collaborators = [
     {
@@ -49,6 +33,23 @@ function LibraryPage() {
       avatar: "https://github.com/identicons/aikirokito.png",
     },
   ];
+
+  function handleUploadFile(e) {
+    const files = Array.from(e.target.files);
+
+    if (files.length === 0) return;
+
+    const uploadedFiles = files.map((file) => ({
+      type: "file",
+      name: file.name,
+      note: `${(file.size / 1024).toFixed(1)} KB`,
+      updatedAt: new Date().toLocaleString(),
+    }));
+
+    setLibraryItems((currentItems) => [...uploadedFiles, ...currentItems]);
+
+    e.target.value = "";
+  }
 
   return (
     <main className="library_page">
@@ -78,10 +79,15 @@ function LibraryPage() {
               Star
             </button>
 
-            <button className="primary_action_btn">
+            <label className="primary_action_btn upload_file_btn">
               <i className="ti-upload"></i>
               Upload
-            </button>
+              <input
+                type="file"
+                multiple
+                onChange={handleUploadFile}
+              />
+            </label>
           </div>
         </section>
 
@@ -91,8 +97,6 @@ function LibraryPage() {
           </a>
           <a href="#">Documents</a>
           <a href="#">AI Chat</a>
-          <a href="#">Summaries</a>
-          <a href="#">Subjects</a>
           <a href="#">Members</a>
           <a href="#">Settings</a>
         </nav>
@@ -108,7 +112,15 @@ function LibraryPage() {
               <div className="library_toolbar_right">
                 <button className="light_action_btn">Search file</button>
                 <button className="light_action_btn">New folder ▾</button>
-                <button className="code_action_btn">Upload ▾</button>
+
+                <label className="code_action_btn upload_file_btn">
+                  Upload ▾
+                  <input
+                    type="file"
+                    multiple
+                    onChange={handleUploadFile}
+                  />
+                </label>
               </div>
             </div>
 
@@ -124,14 +136,14 @@ function LibraryPage() {
                 </div>
 
                 <div className="activity_right">
-                  <span>Latest activity</span>
-                  <span>5 hours ago</span>
+                  <span>Total files</span>
+                  <span>{libraryItems.length}</span>
                 </div>
               </div>
 
               <div className="library_item_list">
                 {libraryItems.map((item, index) => (
-                  <div className="library_item_row" key={index}>
+                  <div className="library_item_row" key={`${item.name}-${index}`}>
                     <div className="library_item_name">
                       <i
                         className={
@@ -185,12 +197,12 @@ function LibraryPage() {
 
                 <div>
                   <span>Total files</span>
-                  <strong>128</strong>
+                  <strong>{libraryItems.length}</strong>
                 </div>
 
                 <div>
                   <span>Last update</span>
-                  <strong>5 hours ago</strong>
+                  <strong>just now</strong>
                 </div>
               </div>
             </div>

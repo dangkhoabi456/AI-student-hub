@@ -106,43 +106,7 @@ body {
   margin: 20px 0;
 }
 
-.top_repo_header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
 
-.top_repo_header p {
-  font-size: 14px;
-  font-weight: 700;
-  color: #b4531a;
-}
-
-.top_repo_header button {
-  background: transparent;
-  border: none;
-  color: #9a826b;
-  cursor: pointer;
-}
-
-.repo_list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.repo_item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: #efcbb0;
-  text-decoration: none;
-  font-size: 14px;
-}
-
-.repo_item:hover {
-  color: #b4531a;
-}
 
 
 /* Library shortcuts in sidebar */
@@ -333,8 +297,7 @@ body {
   color: #2f2015;
 }
 
-.new_library_btn,
-.new_repo_btn {
+.new_library_btn {
   background: #b4531a;
   color: #ffffff;
   border: none;
@@ -345,8 +308,7 @@ body {
   box-shadow: 0 8px 18px rgba(180, 83, 26, 0.22);
 }
 
-.new_library_btn,
-.new_repo_btn:hover {
+.new_library_btn {
   background: #923f12;
 }
 
@@ -381,9 +343,9 @@ body {
   background: #ead7bd;
 }
 
-/* Library / Repository */
+/* Library  */
 
-.repository_card {
+.library_card {
   border: 1px solid #e2d3bc;
   border-radius: 12px;
   overflow: hidden;
@@ -391,7 +353,7 @@ body {
   box-shadow: 0 14px 36px rgba(59, 38, 24, 0.12);
 }
 
-.repository_card_header {
+.library_card_header {
   padding: 16px 20px;
   background: #f2e3c9;
   border-bottom: 1px solid #e2d3bc;
@@ -400,7 +362,7 @@ body {
   color: #2f2015;
 }
 
-.repository_item {
+.library_item {
   padding: 20px 22px;
   border-bottom: 1px solid #e2d3bc;
   display: flex;
@@ -409,21 +371,21 @@ body {
   background: #fffaf0;
 }
 
-.repository_item:hover {
+.library_item:hover {
   background: #fff4df;
 }
 
-.repository_item:last-child {
+.library_item:last-child {
   border-bottom: none;
 }
 
-.repository_item h3 {
+.library_item h3 {
   margin: 0 0 10px;
   color: #3b2618;
   font-size: 17px;
 }
 
-.repo_meta {
+.library_meta {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
@@ -439,7 +401,7 @@ body {
   display: inline-block;
 }
 
-.repo_graph {
+.library_graph {
   width: 130px;
   height: 28px;
   border-bottom: 2px solid #b4531a;
@@ -467,12 +429,10 @@ body {
     gap: 12px;
   }
 
-  .repository_item,
   .library_item {
     align-items: flex-start;
   }
 
-  .repo_graph,
   .library_graph {
     display: none;
   }
