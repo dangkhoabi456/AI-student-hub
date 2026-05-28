@@ -1,6 +1,6 @@
 import { useState } from "react";
 import "./ChatBot.css";
-
+import aiChatbotIcon from "../../../assets/imgs/AIchatbot.png";
 import { IoIosSend } from "react-icons/io";
 import { RiResetRightLine } from "react-icons/ri";
 import { IoMdClose } from "react-icons/io";
@@ -65,7 +65,7 @@ function ChatBot() {
         <div className="chat-box">
           {/* HEADER */}
           <div className="chat-header">
-            <b>StudyHub AI</b>
+            <img src={aiChatbotIcon} alt="AI Chatbot" />
 
             <div className="header-actions">
               <button onClick={() => setShowHistory(!showHistory)}>
