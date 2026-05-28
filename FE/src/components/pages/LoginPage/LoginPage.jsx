@@ -1,9 +1,12 @@
 import React, { useState } from "react";
 import FormInput from "../../common/FormInput/FormInput.jsx";
-import { GoogleLogin } from "@react-oauth/google";
+import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google"; // Thêm import GoogleOAuthProvider
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "./LoginPage.css";
+
+// Khai báo trực tiếp Client ID tại đây
+const GOOGLE_CLIENT_ID = "816282057609-4clrdj4f4mp1jh72m40ffaf04fne6vhe.apps.googleusercontent.com";
 
 function LoginPage() {
   const [username, setUsername] = useState("");
@@ -12,9 +15,8 @@ function LoginPage() {
 
   // Hàm xử lý khi bấm nút Submit
   const handleSubmit = async (e) => {
-    e.preventDefault(); // Ngăn trình duyệt reload
+    e.preventDefault(); 
 
-    // In ra vùng nhớ chuẩn bị gửi đi
     console.log("[DRY RUN] Payload:", { username, password });
 
     if (!username || !password) {
@@ -23,22 +25,17 @@ function LoginPage() {
     }
 
     try {
-      // Bắn request POST lên API đăng nhập của Backend
       const res = await axios.post("http://localhost:5000/api/auth/login", {
         username,
         password
       });
 
-      // Trích xuất Access Token từ vùng nhớ Response
       const accessToken = res.data.data.accessToken;
-
-      // Cấp phát Token vào Local Storage của trình duyệt
       localStorage.setItem("accessToken", accessToken);
 
-      navigate('/dashboard'); // Chuyển trang
+      navigate('/dashboard'); 
 
     } catch (error) {
-      // Bắt lỗi từ Backend trả về (mã 400, 401, 500...)
       console.error("Lỗi đăng nhập:", error);
       const errorMsg = error.response?.data?.message || "Đăng nhập thất bại. Vui lòng thử lại.";
       alert(errorMsg);
@@ -60,7 +57,6 @@ function LoginPage() {
         } else {
           alert("Email này chưa đăng ký tài khoản. Hệ thống tự động chuyển sang luồng đăng ký mới!");
         }
-        // Truyền email vào state của Route
         navigate('/verify-otp', { state: { email: responseData.email } });
       } else {
         localStorage.setItem("accessToken", responseData.accessToken);
@@ -79,7 +75,6 @@ function LoginPage() {
 
   return (
     <div className="login_page">
-      {/* 3. Gắn hàm handleSubmit vào sự kiện của form */}
       <form className="login_form" onSubmit={handleSubmit}>
         <p className="login_title">Log in</p>
         <div className="login_flex">
@@ -87,7 +82,6 @@ function LoginPage() {
             type="text"
             label="Username or gmail"
             className="username_input"
-            // 4. Liên kết dữ liệu 2 chiều cho input
             value={username}
             onChange={(e) => setUsername(e.target.value)}
           />
@@ -96,7 +90,6 @@ function LoginPage() {
             type="password"
             label="Password"
             className="password_input"
-            // 4. Liên kết dữ liệu 2 chiều cho input
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
@@ -104,7 +97,6 @@ function LoginPage() {
 
         <button className="login_submit" type="submit">Submit</button>
 
-        {/* ... (Phần UI bên dưới giữ nguyên) ... */}
         <p className="login_message">
           Didn't have an account?{' '}
           <span onClick={() => navigate('/register')} style={{ color: '#0056b3', cursor: 'pointer', textDecoration: 'underline', fontWeight: '500' }}>
@@ -117,7 +109,10 @@ function LoginPage() {
         <div className="account_link_container">
           <p className="link_account_text">Or with</p>
           <div style={{ display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
-            <GoogleLogin onSuccess={handleGoogleSuccess} onError={handleGoogleError} useOneTap={false} />
+            {/* Bọc Provider quanh nút GoogleLogin */}
+            <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+              <GoogleLogin onSuccess={handleGoogleSuccess} onError={handleGoogleError} useOneTap={false} />
+            </GoogleOAuthProvider>
           </div>
         </div>
       </form>

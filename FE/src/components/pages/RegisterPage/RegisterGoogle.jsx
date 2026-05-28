@@ -1,8 +1,11 @@
 import React from "react";
-import { GoogleLogin } from "@react-oauth/google";
+import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google"; // Thêm import GoogleOAuthProvider
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "./Register.css";
+
+// Khai báo trực tiếp Client ID tại đây
+const GOOGLE_CLIENT_ID = "816282057609-4clrdj4f4mp1jh72m40ffaf04fne6vhe.apps.googleusercontent.com";
 
 function Register() {
   const navigate = useNavigate();
@@ -34,7 +37,10 @@ function Register() {
         </p>
         <div className="account_link_container">
           <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
-            <GoogleLogin onSuccess={handleGoogleSuccess} onError={() => console.log("Google Auth Error")} />
+            {/* Bọc Provider quanh nút GoogleLogin */}
+            <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+              <GoogleLogin onSuccess={handleGoogleSuccess} onError={() => console.log("Google Auth Error")} />
+            </GoogleOAuthProvider>
           </div>
         </div>
         <p className="register_signin">
