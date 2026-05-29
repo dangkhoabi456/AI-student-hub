@@ -15,7 +15,7 @@ function LoginPage() {
 
   // Hàm xử lý khi bấm nút Submit
   const handleSubmit = async (e) => {
-    e.preventDefault(); 
+    e.preventDefault();
 
     console.log("[DRY RUN] Payload:", { username, password });
 
@@ -25,7 +25,7 @@ function LoginPage() {
     }
 
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/login", {
+      const res = await axios.post("http://ai-student-hub-xtw6.onrender.com/api/auth/login", {
         username,
         password
       });
@@ -33,7 +33,7 @@ function LoginPage() {
       const accessToken = res.data.data.accessToken;
       localStorage.setItem("accessToken", accessToken);
 
-      navigate('/dashboard'); 
+      navigate('/dashboard');
 
     } catch (error) {
       console.error("Lỗi đăng nhập:", error);
@@ -45,8 +45,8 @@ function LoginPage() {
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
       const googleToken = credentialResponse.credential;
-      const res = await axios.post("http://localhost:5000/api/auth/google", {
-        token: googleToken,
+      const res = await axios.post("https://ai-student-hub-xtw6.onrender.com/api/auth/google", {
+        token: googleToken
       });
 
       const responseData = res.data.data;
@@ -60,7 +60,7 @@ function LoginPage() {
         navigate('/verify-otp', { state: { email: responseData.email } });
       } else {
         localStorage.setItem("accessToken", responseData.accessToken);
-        alert("Log in successfully!");
+        // alert("Log in successfully!");
         navigate('/dashboard');
       }
     } catch (error) {

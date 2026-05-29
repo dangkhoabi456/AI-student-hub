@@ -13,7 +13,7 @@ function Register() {
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
       const googleToken = credentialResponse.credential;
-      const res = await axios.post("http://localhost:5000/api/auth/google", { token: googleToken });
+      const res = await axios.post("http://ai-student-hub-xtw6.onrender.com/api/auth/google", { token: googleToken });
 
       if (res.data.data.requiresOTP) {
         navigate('/verify-otp', { state: { email: res.data.data.email } });
