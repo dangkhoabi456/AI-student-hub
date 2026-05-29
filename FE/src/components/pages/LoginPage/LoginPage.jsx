@@ -25,7 +25,7 @@ function LoginPage() {
     }
 
     try {
-      const res = await axios.post("http://ai-student-hub-xtw6.onrender.com/api/auth/login", {
+      const res = await axios.post("https://ai-student-hub-xtw6.onrender.com/api/auth/login", {
         username,
         password
       });
