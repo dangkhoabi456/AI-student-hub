@@ -9,11 +9,11 @@
   color: white;
   border: none;
   border-radius: 50%;
-  width: 42px;
-  height: 42px;
+  width: 50px;
+  height: 50px;
   font-size: 20px;
   cursor: pointer;
-  transition: 0.2s;
+  transition: 0.5s;
 }
 
 #bubble button:hover {
@@ -107,15 +107,16 @@
   border-top: 1px solid #eee;
 }
 
-.chat-input input {
+.chat-input textarea {
   flex: 1;
+  height: 36px;
   padding: 8px;
   border: 1px solid #ddd;
   border-radius: 10px;
   outline: none;
 }
 
-.chat-input input:focus {
+.chat-input textarea:focus {
   border: 2px solid black;
 }
 
@@ -186,7 +187,6 @@
 
 .user-row {
   display: flex;
-
   flex-direction: row-reverse;
 }
 
@@ -194,10 +194,13 @@
   display: flex;
   justify-content: flex-start;
 }
-
+#load-msg {
+  font-family: Tahoma, sans-serif;
+  font-size: 13px;
+}
 .avatar {
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   background: #ddd;
   display: flex;

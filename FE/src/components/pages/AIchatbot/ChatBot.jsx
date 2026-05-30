@@ -1,18 +1,23 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./ChatBot.css";
 import aiChatbotIcon from "../../../assets/imgs/AIchatbot.png";
+
 import { IoIosSend } from "react-icons/io";
 import { RiResetRightLine } from "react-icons/ri";
 import { IoMdClose } from "react-icons/io";
 import { IoChatbubbleEllipses } from "react-icons/io5";
 import { FaPaperclip } from "react-icons/fa";
 import { FaHistory } from "react-icons/fa";
-
+import { RiRobot2Fill } from "react-icons/ri";
+import { FaUser } from "react-icons/fa6";
 function ChatBot() {
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
   const [showHistory, setShowHistory] = useState(false);
   const [file, setFile] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const bottomRef = useRef(null);
 
   // CHAT HIỆN TẠI
   const [messages, setMessages] = useState([
@@ -22,27 +27,42 @@ function ChatBot() {
   // LỊCH SỬ CHAT
   const [history, setHistory] = useState([]);
 
-  const sendMessage = () => {
-    if (input.trim() === "" && !file) return;
+  // AUTO SCROLL
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
-    const newMessage = {
+  const sendMessage = () => {
+    if ((input.trim() === "" && !file) || loading) return;
+
+    const userMessage = {
       id: Date.now(),
       role: "user",
       text: input,
       fileName: file ? file.name : null,
     };
 
-    // thêm vào chat hiện tại
-    setMessages((prev) => [...prev, newMessage]);
-
-    // thêm vào history
-    setHistory((prev) => [...prev, newMessage]);
+    setMessages((prev) => [...prev, userMessage]);
+    setHistory((prev) => [...prev, userMessage]);
 
     setInput("");
     setFile(null);
+
+    // fake AI typing
+    setLoading(true);
+
+    setTimeout(() => {
+      const aiMessage = {
+        id: Date.now() + 1,
+        role: "ai",
+        text: "I received: " + input,
+      };
+
+      setMessages((prev) => [...prev, aiMessage]);
+      setLoading(false);
+    }, 800);
   };
 
-  // CHỈ RESET CHAT HIỆN TẠI
   const resetChat = () => {
     setMessages([{ id: 1, role: "ai", text: "Hello 👋" }]);
   };
@@ -60,7 +80,6 @@ function ChatBot() {
         </button>
       </div>
 
-      {/* Chat box */}
       {open && (
         <div className="chat-box">
           {/* HEADER */}
@@ -82,11 +101,10 @@ function ChatBot() {
             </div>
           </div>
 
-          {/* HISTORY PANEL */}
+          {/* HISTORY */}
           {showHistory && (
             <div className="chat-history">
               <h4>Chat History</h4>
-
               {history.map((m) => (
                 <div key={m.id}>
                   <b>{m.role}</b>: {m.text}
@@ -100,20 +118,18 @@ function ChatBot() {
             {messages.map((m) => (
               <div
                 key={m.id}
-                className={`msg-row ${
-                  m.role === "user" ? "user-row" : "ai-row"
-                }`}
+                className={`msg-row ${m.role === "user" ? "user-row" : "ai-row"}`}
               >
-                {/* AVATAR */}
-                <div className="avatar">{m.role === "user" ? "🧑" : "🤖"}</div>
+                <div className="avatar">
+                  {m.role === "user" ? <FaUser /> : <RiRobot2Fill />}
+                </div>
 
-                {/* MESSAGE */}
                 <div
                   className={`message ${
                     m.role === "user" ? "user-msg" : "ai-msg"
                   }`}
                 >
-                  <b>{m.role}:</b> {m.text}
+                  {m.text}
                   {m.fileName && (
                     <div className="file-tag">
                       <FaPaperclip /> {m.fileName}
@@ -122,6 +138,15 @@ function ChatBot() {
                 </div>
               </div>
             ))}
+
+            {/* typing indicator */}
+            {loading && (
+              <div id="load-msg">
+                <b>StudyHub Assistant</b> is thinking...
+              </div>
+            )}
+
+            <div ref={bottomRef}></div>
           </div>
 
           {/* INPUT */}
@@ -131,16 +156,20 @@ function ChatBot() {
               <input type="file" hidden onChange={handleFileChange} />
             </label>
 
-            <input
+            <textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Ask something..."
+              disabled={loading}
               onKeyDown={(e) => {
-                if (e.key === "Enter") sendMessage();
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  sendMessage();
+                }
               }}
             />
 
-            <button onClick={sendMessage}>
+            <button onClick={sendMessage} disabled={loading}>
               <IoIosSend />
             </button>
           </div>
